@@ -1,0 +1,3004 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Калькулятор покупки квартиры</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#1A365D;--navy2:#2A4A7F;--navy3:#EBF0F9;--navy4:#F5F8FF;
+  --gold:#B8862A;--gold2:#FDF5E4;--gold3:#E8C97A;
+  --green:#1E8A5E;--green2:#E6F5EF;
+  --red:#C94040;--red2:#FBEAEA;
+  --blue:#2E6FBF;--blue2:#EAF1FB;
+  --orange:#C86A00;--orange2:#FEF3E2;
+  --purple:#6D28C0;--purple2:#EDE9FE;
+  --bg:#F0F4FA;--card:#FFFFFF;--border:#DDE4EF;--border2:#C5D0E5;
+  --tx:#1A2535;--tx2:#566480;--tx3:#9AAABB;
+  --sh:0 2px 16px rgba(26,54,93,.09);--sh2:0 8px 32px rgba(26,54,93,.14);--r:14px
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--tx);font-size:14px;line-height:1.5;min-height:100vh}
+
+/* ── HEADER ── */
+.hdr{background:linear-gradient(135deg,#0F2444 0%,#1A365D 60%,#1E4080 100%);color:#fff;padding:0 24px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 3px 20px rgba(0,0,0,.28)}
+.hdr-l{display:flex;align-items:center;gap:13px}
+.hdr-ico{width:36px;height:36px;background:linear-gradient(135deg,rgba(255,255,255,.22),rgba(255,255,255,.08));border:1px solid rgba(255,255,255,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.hdr-title{font-size:15px;font-weight:800;letter-spacing:-.3px}
+.hdr-sub{font-size:11px;opacity:.5;letter-spacing:.2px}
+.hdr-r{display:flex;gap:7px}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 15px;border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;transition:.15s all;font-family:inherit;white-space:nowrap;line-height:1}
+.btn-sm{padding:5px 11px;font-size:12px;border-radius:7px}
+.btn-xs{padding:4px 8px;font-size:11px;border-radius:5px}
+.btn-gold{background:linear-gradient(135deg,#C9973A,#B07820);color:#fff;box-shadow:0 2px 8px rgba(176,120,32,.3)}.btn-gold:hover{filter:brightness(1.08)}
+.btn-outline{background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.28);color:#fff;backdrop-filter:blur(4px)}.btn-outline:hover{background:rgba(255,255,255,.16)}
+.btn-ghost{background:transparent;color:var(--tx2);border:1.5px solid var(--border)}.btn-ghost:hover{background:var(--bg);border-color:var(--border2)}
+.btn-green{background:linear-gradient(135deg,#1E8A5E,#166B48);color:#fff;box-shadow:0 2px 8px rgba(30,138,94,.25)}.btn-green:hover{opacity:.9}
+.btn-red{background:var(--red);color:#fff}.btn-red:hover{opacity:.88}
+.btn-navy{background:linear-gradient(135deg,var(--navy2),var(--navy));color:#fff;box-shadow:0 2px 8px rgba(26,54,93,.25)}.btn-navy:hover{filter:brightness(1.1)}
+.btn-blue{background:var(--blue);color:#fff}.btn-blue:hover{opacity:.88}
+.btn-link{background:0;border:0;color:var(--blue);font-size:13px;font-weight:600;cursor:pointer;padding:0;font-family:inherit}.btn-link:hover{opacity:.72}
+.preset-btn{padding:5px 11px;border:1.5px solid var(--border);border-radius:7px;background:#fff;cursor:pointer;font-size:12px;font-weight:600;color:var(--tx2);transition:.15s all;font-family:inherit}
+.preset-btn:hover{border-color:var(--navy);color:var(--navy);background:var(--navy4)}
+
+/* ── LAYOUT ── */
+.layout{display:grid;grid-template-columns:418px 1fr;height:calc(100vh - 58px);overflow:hidden}
+.sidebar{overflow-y:auto;background:var(--bg);border-right:1px solid var(--border);padding-bottom:24px;height:100%}
+.main{overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:15px}
+
+/* ── ACCORDION ── */
+.acc{border-radius:12px;border:1.5px solid var(--border);margin:8px 12px;overflow:hidden;box-shadow:0 1px 3px rgba(26,54,93,.05)}
+.acc-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;user-select:none;transition:.12s;background:#fff}
+.acc-hdr:hover{background:var(--navy4)}
+.acc-ttl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--navy);display:flex;align-items:center;gap:8px}
+.acc-ico{font-size:14px}
+.acc-arr{color:var(--tx3);transition:transform .2s;font-size:10px}
+.acc-arr.open{transform:rotate(180deg)}
+
+.tag-on{background:#DCFCE7;color:#15803D}
+.tag-gold{background:#FEF3C7;color:#92400E}
+.tag{display:inline-flex;align-items:center;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.3px;margin-left:4px}
+.acc.acc-active>.acc-hdr{background:linear-gradient(135deg,#F0FDF4,#F8FAFC)}
+.acc.acc-active{border-color:#BBF7D0}
+.acc-body{padding:0 16px 16px;display:none;flex-direction:column;gap:12px;border-top:1px solid var(--border);background:#FAFBFD}
+.acc-body.open{display:flex}
+
+/* ── FORM ── */
+.fg{display:flex;flex-direction:column;gap:5px}
+label.lbl{font-size:11px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end}
+input[type=text],select,textarea{width:100%;padding:9px 13px;border:1.5px solid var(--border);border-radius:9px;font-size:14px;color:var(--tx);background:#fff;font-family:inherit;transition:border-color .15s,box-shadow .15s;outline:none}
+input[type=text]:focus,select:focus,textarea:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(26,54,93,.08)}
+input.ri{text-align:right}
+textarea{resize:vertical;min-height:52px}
+.iw{position:relative;display:flex;align-items:center;border:1.5px solid var(--border);border-radius:9px;background:#fff;transition:border-color .15s,box-shadow .15s;overflow:hidden}
+.iw:focus-within{border-color:var(--navy);box-shadow:0 0 0 3px rgba(26,54,93,.08)}
+.iw input{flex:1;min-width:0;border:none!important;background:transparent!important;box-shadow:none!important;border-radius:0!important;padding:9px 4px 9px 13px!important}
+.iw input:focus{border-color:transparent!important;box-shadow:none!important}
+.isfx{position:static;flex-shrink:0;padding:0 11px 0 2px;color:var(--tx3);font-size:12px;font-weight:700;pointer-events:none;letter-spacing:.3px;white-space:nowrap;user-select:none}
+
+/* rtab */
+.rtab{display:flex;border:1.5px solid var(--border);border-radius:9px;overflow:hidden;background:var(--bg)}
+.rtab label{flex:1;text-align:center;padding:7px 4px;cursor:pointer;font-size:12px;font-weight:600;color:var(--tx2);background:transparent;transition:.12s;user-select:none;border-right:1px solid var(--border);line-height:1.2}
+.rtab label:last-child{border-right:none}
+.rtab label:hover{background:var(--navy3)}
+.rtab input{display:none}
+.rtab input:checked+label{background:var(--navy);color:#fff;box-shadow:0 1px 4px rgba(26,54,93,.2)}
+
+/* toggle */
+.togrow{display:flex;align-items:center;justify-content:space-between;padding:3px 0}
+.toglbl{font-size:13px;font-weight:600;color:var(--tx)}
+.tog{position:relative;width:44px;height:24px;flex-shrink:0}
+.tog input{opacity:0;width:0;height:0}
+.togsl{position:absolute;inset:0;background:var(--border2);border-radius:24px;cursor:pointer;transition:.2s}
+.togsl:before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.tog input:checked+.togsl{background:var(--navy)}
+.tog input:checked+.togsl:before{transform:translateX(20px)}
+
+/* ── DP DISPLAY ── */
+.dpbox{display:flex;gap:1px;border:1.5px solid var(--border);border-radius:11px;overflow:hidden;background:var(--border)}
+.dpcell{flex:1;padding:9px 8px;background:#fff;text-align:center}
+.dplbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:var(--tx3)}
+.dpval{font-size:13px;font-weight:800;color:var(--navy)}
+
+/* ── RULES TABLE ── */
+.rules-tbl{width:100%;border-collapse:collapse}
+.rules-tbl th{padding:6px 8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:var(--tx2);text-align:left;border-bottom:2px solid var(--border);white-space:nowrap}
+.rules-tbl td{padding:5px 4px;vertical-align:middle}
+.rules-tbl tr:not(:last-child) td{border-bottom:1px solid var(--bg)}
+.rules-tbl input[type=text]{padding:7px 10px;font-size:13px}
+.rules-tbl .isfx{font-size:11px;padding-right:8px}
+.computed-amt{font-size:12px;font-weight:700;color:var(--navy);white-space:nowrap;padding:0 4px;min-width:70px}
+.del-btn{width:26px;height:26px;border:none;background:var(--red2);color:var(--red);border-radius:6px;cursor:pointer;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.12s}
+.del-btn:hover{background:var(--red);color:#fff}
+.base-row td{background:#F8FAFD}
+.base-row .base-lbl{font-size:11px;color:var(--tx2);font-style:italic;padding:0 6px}
+
+/* ── RATE ROWS ── */
+.rate-row{display:grid;grid-template-columns:110px 1fr auto;gap:8px;align-items:end;margin-bottom:9px}
+
+/* ── EARLY PAYMENTS ── */
+.ep-row{display:grid;grid-template-columns:80px 1fr 110px auto;gap:8px;align-items:end;margin-bottom:8px}
+.ep-row input{font-size:13px}
+
+/* ── SUMMARY CARDS ── */
+.sums{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}
+.sc{background:var(--card);border-radius:13px;padding:15px 16px;box-shadow:var(--sh);border-top:3px solid transparent;transition:.2s}
+.sc:hover{box-shadow:var(--sh2);transform:translateY(-1px)}
+.sc.cn{border-top-color:var(--navy)}.sc.cg{border-top-color:var(--gold)}.sc.cgr{border-top-color:var(--green)}.sc.cr{border-top-color:var(--red)}
+.sc-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--tx2);margin-bottom:3px}
+.sc-val{font-size:18px;font-weight:800;line-height:1.2;letter-spacing:-.3px}
+.sc-sub{font-size:11px;color:var(--tx2);margin-top:2px}
+
+/* ── INST BAR ── */
+.inst-bar{display:flex;gap:8px;padding:12px 16px;background:linear-gradient(135deg,#FDF5E4,#FAF0D5);border:1px solid #E8D090;border-radius:12px;flex-wrap:wrap}
+.inst-bar-item{text-align:center;flex:1;min-width:80px}
+.inst-bar-lbl{font-size:10px;font-weight:700;text-transform:uppercase;color:#8A6800;margin-bottom:2px;letter-spacing:.3px}
+.inst-bar-val{font-size:14px;font-weight:800;color:#5C4000}
+
+/* ── CARD / TABS ── */
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh)}
+.tabs{display:flex;border-bottom:2px solid var(--border);background:var(--card);overflow-x:auto}
+.tab{padding:12px 17px;font-size:13px;font-weight:600;color:var(--tx2);cursor:pointer;border-bottom:2.5px solid transparent;margin-bottom:-2px;transition:.12s;user-select:none;white-space:nowrap}
+.tab:hover{color:var(--navy);background:var(--navy4)}
+.tab.on{color:var(--navy);border-bottom-color:var(--navy);background:transparent}
+
+/* ── SCHEDULE TABLE ── */
+.scht{width:100%;border-collapse:collapse;font-size:13px}
+.scht th{padding:9px 13px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--tx2);background:var(--navy4);border-bottom:2px solid var(--border);text-align:right;white-space:nowrap}
+.scht th:first-child,.scht th:nth-child(2){text-align:left}
+.scht td{padding:7px 13px;border-bottom:1px solid #F0F4FA;text-align:right}
+.scht td:first-child,.scht td:nth-child(2){text-align:left}
+.scht tr:hover td{background:#F5F8FF}
+.scht tfoot td{font-weight:700;background:var(--navy4);border-top:2px solid var(--border);border-bottom:none}
+.bdg{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.2px}
+.bi{background:var(--gold2);color:#7A5000}.bm{background:var(--blue2);color:#1A3F7A}
+.pager{display:flex;align-items:center;justify-content:center;gap:5px;padding:13px;border-top:1px solid var(--border)}
+.pgb{padding:5px 11px;border:1.5px solid var(--border);border-radius:7px;background:#fff;cursor:pointer;font-size:12px;font-weight:600;transition:.12s;font-family:inherit}
+.pgb:hover:not(:disabled){background:var(--bg);border-color:var(--border2)}
+.pgb.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.pgb:disabled{opacity:.3;cursor:not-allowed}
+
+/* ── VARIANTS ── */
+.vlist{display:flex;flex-direction:column;gap:9px}
+.vi{display:flex;align-items:center;gap:11px;padding:13px 15px;border:1.5px solid var(--border);border-radius:12px;background:#fff;transition:.15s all;cursor:default}
+.vi:hover{border-color:var(--navy2);background:var(--navy4);box-shadow:var(--sh)}
+.vi-info{flex:1;min-width:0}
+.vi-name{font-weight:800;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--navy)}
+.vi-meta{font-size:11px;color:var(--tx2);margin-top:3px;line-height:1.5}
+.vi-acts{display:flex;gap:5px;flex-shrink:0}
+
+/* ── COMPARE TABLE ── */
+.cmpt{width:100%;border-collapse:collapse;font-size:13px}
+.cmpt th{padding:10px 13px;background:var(--navy);color:#fff;text-align:center;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+.cmpt th:first-child{text-align:left}
+.cmpt td{padding:8px 13px;text-align:center;border-bottom:1px solid var(--border)}
+.cmpt td:first-child{text-align:left;font-weight:600;color:var(--tx2);font-size:12px}
+.cmpt tr:hover td{background:var(--navy4)}
+.best{background:var(--green2)!important;color:var(--green)!important;font-weight:700}
+
+/* ── ANALYTICS ── */
+.an2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kpi{background:var(--bg);border-radius:11px;padding:12px 14px;border:1px solid transparent;transition:.15s}
+.kpi:hover{border-color:var(--border);background:#fff}
+.kpi-l{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--tx2);margin-bottom:3px}
+.kpi-v{font-size:15px;font-weight:800;color:var(--navy);letter-spacing:-.2px}
+.kpi-s{font-size:11px;color:var(--tx2);margin-top:1px}
+.brow{display:flex;align-items:center;gap:9px;padding:5px 0}
+.blbl{width:138px;font-size:12px;color:var(--tx2);flex-shrink:0}
+.btrk{flex:1;height:7px;background:var(--bg);border-radius:4px;overflow:hidden}
+.bfil{height:100%;border-radius:4px;transition:width .6s}
+.bval{width:60px;text-align:right;font-size:12px;font-weight:700}
+
+/* ── RENT VS BUY ── */
+.rvb-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.rvb-card{border-radius:12px;padding:18px;border:2px solid var(--border)}
+.rvb-card.buy{border-color:var(--navy);background:var(--navy4)}
+.rvb-card.rent{border-color:var(--orange);background:var(--orange2)}
+.rvb-title{font-size:14px;font-weight:800;margin-bottom:12px}
+.rvb-row{display:flex;justify-content:space-between;padding:5px 0;font-size:13px;border-bottom:1px dashed var(--border)}
+.rvb-row:last-child{border-bottom:none;font-weight:700;font-size:14px;padding-top:9px}
+
+/* ── PRE-APPROVAL ── */
+.pa-result{padding:13px 15px;border-radius:10px;background:var(--blue2);border:1px solid #BFDBFE;margin-top:4px}
+.pa-r-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--blue);margin-bottom:3px}
+.pa-r-val{font-size:17px;font-weight:800;color:var(--navy);letter-spacing:-.3px}
+.pa-r-sub{font-size:11px;color:var(--tx2);margin-top:2px}
+
+/* ── MODAL ── */
+.modal-bg{position:fixed;inset:0;background:rgba(10,20,40,.5);display:flex;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(5px)}
+.modal{background:#fff;border-radius:18px;padding:30px;width:460px;max-width:93vw;box-shadow:0 30px 80px rgba(0,0,0,.22);border:1px solid var(--border)}
+.modal-ttl{font-size:19px;font-weight:800;color:var(--navy);margin-bottom:4px;letter-spacing:-.3px}
+.modal-sub{font-size:13px;color:var(--tx2);margin-bottom:20px}
+.modal-acts{display:flex;gap:9px;margin-top:18px}
+.modal-lg{width:680px}
+
+/* ── MISC ── */
+.secttl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--tx2);margin-bottom:9px;display:flex;align-items:center;gap:6px}
+.secttl::after{content:'';flex:1;height:1px;background:var(--border)}
+.alert{padding:11px 14px;border-radius:9px;font-size:12px;line-height:1.6}
+.a-info{background:var(--blue2);color:#1e3a8a;border:1px solid #bfdbfe}
+.a-warn{background:var(--orange2);color:#92400e;border:1px solid #fde68a}
+.a-green{background:var(--green2);color:#14532d;border:1px solid #bbf7d0}
+.a-gold{background:var(--gold2);color:#7a5200;border:1px solid #fcd34d}
+.empty{padding:44px;text-align:center;color:var(--tx2)}
+.empty-ico{font-size:40px;margin-bottom:11px}
+.empty-ttl{font-size:15px;font-weight:700;margin-bottom:5px;color:var(--tx)}
+
+.tag-gold{background:var(--gold2);color:#7A5200}
+hr{border:none;border-top:1px solid var(--border);margin:4px 0}
+.flex{display:flex}.gap6{gap:6px}.gap8{gap:8px}.ac{align-items:center}.jb{justify-content:space-between}.fw{flex-wrap:wrap}
+
+/* ── CRM CLIENTS ── */
+.cl-list{display:flex;flex-direction:column;gap:10px}
+.cl-card{display:flex;align-items:center;gap:12px;padding:14px 16px;border:1.5px solid var(--border);border-radius:13px;background:#fff;cursor:pointer;transition:.15s all}
+.cl-card:hover{border-color:var(--navy2);background:var(--navy4);box-shadow:var(--sh)}
+.cl-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--navy2),var(--navy));color:#fff;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;flex-shrink:0}
+.cl-info{flex:1;min-width:0}
+.cl-name{font-size:14px;font-weight:800;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cl-sub{font-size:11px;color:var(--tx2);margin-top:2px;line-height:1.5}
+.cl-right{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0}
+.cl-acts{display:flex;gap:5px}
+.st-badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
+.st-new{background:#DBEAFE;color:#1D4ED8}.st-work{background:var(--orange2);color:#92400E}
+.st-deal{background:var(--green2);color:#14532D}.st-arch{background:var(--bg);color:var(--tx2)}
+.cl-search{width:100%;padding:9px 13px 9px 36px;border:1.5px solid var(--border);border-radius:9px;font-size:14px;color:var(--tx);background:#fff;font-family:inherit;outline:none;transition:.15s}
+.cl-search:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(26,54,93,.08)}
+.cl-search-wrap{position:relative;margin-bottom:14px}
+.cl-search-ico{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--tx3);font-size:14px;pointer-events:none}
+.crm-form{display:flex;flex-direction:column;gap:13px}
+.crm-form .row2{gap:12px}
+.crm-form .row3{grid-template-columns:1fr 1fr 1fr;gap:10px}
+.cl-vars{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.cl-var-item{display:flex;align-items:center;gap:10px;padding:10px 13px;border:1.5px solid var(--border);border-radius:10px;background:#fff;transition:.15s}
+.cl-var-item:hover{border-color:var(--navy2);background:var(--navy4)}
+.cl-var-info{flex:1;min-width:0}
+.cl-var-name{font-size:13px;font-weight:700;color:var(--navy)}
+.cl-var-meta{font-size:11px;color:var(--tx2);margin-top:2px}
+.back-btn{display:inline-flex;align-items:center;gap:6px;color:var(--navy);font-weight:700;font-size:13px;cursor:pointer;padding:5px 0;margin-bottom:14px;background:none;border:none;font-family:inherit}
+.back-btn:hover{opacity:.7}
+.cl-stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.cl-stat{background:var(--bg);border-radius:10px;padding:10px 12px;text-align:center}
+.cl-stat-n{font-size:20px;font-weight:800;color:var(--navy)}
+.cl-stat-l{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--tx2);margin-top:1px}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--tx3)}
+
+@media print{
+  body{background:#fff!important}
+  .no-print{display:none!important}
+  .print-page{display:block!important;page-break-after:always}
+  .print-body{display:block!important}
+  header,.sidebar,.tabs,.hdr,.btn,.pager{display:none!important}
+  .layout{display:block!important;height:auto!important;overflow:visible!important}
+  .main{overflow:visible!important;padding:0!important}
+  .card{box-shadow:none!important;border:none!important}
+}
+#pdf-frame{display:none}
+.pdf-kp{font-family:sans-serif;color:#1A365D;padding:28px;max-width:820px;margin:0 auto}
+.pdf-hdr{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:16px;border-bottom:3px solid #1A365D;margin-bottom:20px}
+.pdf-logo-area{display:flex;flex-direction:column;gap:4px}
+.pdf-rl-name{font-size:16px;font-weight:800;color:#1A365D}
+.pdf-rl-sub{font-size:12px;color:#64748b}
+.pdf-obj-title{font-size:22px;font-weight:800;color:#1A365D;margin-bottom:4px}
+.pdf-obj-sub{font-size:13px;color:#64748b}
+.pdf-kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0}
+.pdf-kpi{background:#F0F4FF;border-radius:10px;padding:14px 16px}
+.pdf-kpi-l{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#64748b;margin-bottom:4px}
+.pdf-kpi-v{font-size:18px;font-weight:800;color:#1A365D}
+.pdf-kpi-s{font-size:11px;color:#64748b;margin-top:2px}
+.pdf-kpi.good{background:#ECFDF5}.pdf-kpi.good .pdf-kpi-v{color:#1E8A5E}
+.pdf-kpi.warn{background:#FFFBEB}.pdf-kpi.warn .pdf-kpi-v{color:#92400E}
+.pdf-section-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#64748b;border-bottom:1.5px solid #E2E8F0;padding-bottom:6px;margin:20px 0 12px}
+.pdf-args{display:flex;flex-direction:column;gap:8px}
+.pdf-arg{display:flex;gap:10px;padding:10px 14px;border-radius:8px;font-size:13px;line-height:1.5}
+.pdf-arg.green{background:#ECFDF5;border-left:4px solid #1E8A5E;color:#14532d}
+.pdf-arg.blue{background:#EFF6FF;border-left:4px solid #2563EB;color:#1e3a8a}
+.pdf-arg.gold{background:#FFFBEB;border-left:4px solid #D97706;color:#78350f}
+.pdf-fp{max-width:100%;max-height:280px;object-fit:contain;border-radius:10px;border:1px solid #E2E8F0;display:block;margin:0 auto}
+.pdf-footer{margin-top:28px;padding-top:14px;border-top:1px solid #E2E8F0;font-size:11px;color:#94a3b8;display:flex;justify-content:space-between}
+.pdf-cmp-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px}
+.pdf-cmp-table th{background:#1A365D;color:#fff;padding:8px 12px;text-align:center;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+.pdf-cmp-table th:first-child{text-align:left}
+.pdf-cmp-table td{padding:7px 12px;border-bottom:1px solid #E2E8F0;text-align:center}
+.pdf-cmp-table td:first-child{text-align:left;font-weight:600;color:#1A365D}
+.pdf-cmp-table .best-cell{background:#ECFDF5;color:#1E8A5E;font-weight:800}
+@media(max-width:920px){
+  .layout{grid-template-columns:1fr;height:auto;overflow:visible}
+  .sidebar{border-right:none;border-bottom:2px solid var(--border)}
+  .sums{grid-template-columns:1fr 1fr}.an2{grid-template-columns:1fr}.rvb-grid{grid-template-columns:1fr}
+}
+@media(max-width:540px){.sums{grid-template-columns:1fr 1fr}.hdr-sub{display:none}}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hdr-l">
+    <div class="hdr-ico">🏠</div>
+    <div>
+      <div class="hdr-title">Калькулятор покупки квартиры</div>
+      <div class="hdr-sub" id="hdr-realtor-name">Рассрочка · Ипотека · Сравнение вариантов</div>
+    </div>
+  </div>
+  <div class="hdr-r">
+    <button class="btn btn-outline btn-sm" onclick="openRealtorModal()" title="Контакты риелтора">⚙️ Риелтор</button>
+    <button class="btn btn-gold btn-sm" onclick="showSaveModal()">💾 Сохранить</button>
+  </div>
+</header>
+
+<div class="layout">
+<aside class="sidebar">
+
+<!-- 1. Объект -->
+<div class="acc" id="A-ref">
+  <div class="acc-hdr" onclick="togAcc('ref')">
+    <div class="acc-ttl"><span class="acc-ico">📋</span>Объект</div>
+    <div class="acc-arr" id="arr-ref">▼</div>
+  </div>
+  <div class="acc-body" id="body-ref">
+    <div class="row2">
+      <div class="fg"><label class="lbl">Жилой комплекс</label><input type="text" id="r-zhk" placeholder="ЖК Название" oninput="recalc()"></div>
+      <div class="fg"><label class="lbl">Площадь, м²</label><input type="text" id="r-area" class="ri" placeholder="65.4" oninput="recalc()"></div>
+    </div>
+    <div class="fg"><label class="lbl">Заметки</label><textarea id="r-note" placeholder="Этаж, секция, особенности…"></textarea></div>
+    <div class="fg">
+      <label class="lbl">Планировка квартиры</label>
+      <div id="fp-preview-wrap" style="display:none;margin-bottom:6px;position:relative">
+        <img id="fp-preview" src="" alt="Планировка" style="max-width:100%;max-height:200px;border-radius:9px;border:1.5px solid var(--border);object-fit:contain;background:#f8f9fb">
+        <button onclick="clearFloorPlan()" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center">×</button>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('fp-file').click()" style="width:100%">📐 Загрузить планировку</button>
+      <input type="file" id="fp-file" accept="image/*" style="display:none" onchange="onFloorPlanFile(event)">
+    </div>
+  </div>
+</div>
+
+<!-- 2. Цена и взнос -->
+<div class="acc" id="A-price">
+  <div class="acc-hdr" onclick="togAcc('price')">
+    <div class="acc-ttl"><span class="acc-ico">💰</span>Стоимость и первоначальный взнос</div>
+    <div class="acc-arr open" id="arr-price">▼</div>
+  </div>
+  <div class="acc-body open" id="body-price">
+    <div class="fg">
+      <label class="lbl">Цена квартиры, ₽</label>
+      <div class="iw"><input type="text" id="price" class="ri" placeholder="10 000 000" oninput="onPriceIn()" onfocus="unfmt(this)" onblur="fmtf(this)"><span class="isfx">₽</span></div>
+    </div>
+    <div class="fg">
+      <label class="lbl">Стоимость отделки, ₽ <span style="color:var(--tx3);font-weight:400;text-transform:none">(доп.)</span></label>
+      <div class="iw"><input type="text" id="finishing" class="ri" placeholder="500 000" oninput="recalc()" onfocus="unfmt(this)" onblur="fmtf(this)"><span class="isfx">₽</span></div>
+    </div>
+    <div class="fg">
+      <label class="lbl">Первоначальный взнос</label>
+      <div class="rtab">
+        <input type="radio" name="dpmode" id="dp-a" value="a" checked><label for="dp-a" onclick="setDp('a')">Сумма ₽</label>
+        <input type="radio" name="dpmode" id="dp-p" value="p"><label for="dp-p" onclick="setDp('p')">Процент %</label>
+      </div>
+      <div id="dp-aw" class="iw"><input type="text" id="dp-amt" class="ri" placeholder="2 000 000" oninput="onDpIn()" onfocus="unfmt(this)" onblur="fmtf(this)"><span class="isfx">₽</span></div>
+      <div id="dp-pw" class="iw" style="display:none"><input type="text" id="dp-pct" class="ri" placeholder="20" oninput="onDpIn()"><span class="isfx">%</span></div>
+    </div>
+    <div id="dpbox" class="dpbox" style="display:none">
+      <div class="dpcell"><div class="dplbl">Взнос</div><div class="dpval" id="dp-sv-a">—</div></div>
+      <div class="dpcell"><div class="dplbl">Процент</div><div class="dpval" id="dp-sv-p">—</div></div>
+      <div class="dpcell"><div class="dplbl">Остаток</div><div class="dpval" id="dp-sv-r">—</div></div>
+    </div>
+    <div class="fg">
+      <label class="lbl">Материнский капитал <span style="color:var(--tx3);font-weight:400;text-transform:none">(добавляется к взносу)</span></label>
+      <div class="iw"><input type="text" id="matcap" class="ri" placeholder="0" oninput="recalc()" onfocus="unfmt(this)" onblur="fmtf(this)"><span class="isfx">₽</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- 3. Рассрочка -->
+<div class="acc" id="A-inst">
+  <div class="acc-hdr" onclick="togAcc('inst')">
+    <div class="acc-ttl"><span class="acc-ico">📅</span>Рассрочка<span class="tag tag-on" id="inst-tag" style="display:none">вкл</span></div>
+    <div class="acc-arr open" id="arr-inst">▼</div>
+  </div>
+  <div class="acc-body open" id="body-inst">
+    <div class="togrow">
+      <span class="toglbl">Период рассрочки перед ипотекой</span>
+      <label class="tog"><input type="checkbox" id="inst-on" onchange="onInstTog()"><span class="togsl"></span></label>
+    </div>
+    <div id="inst-fields" style="display:none;flex-direction:column;gap:12px">
+      <div class="fg">
+        <label class="lbl">Срок рассрочки</label>
+        <div class="row2">
+          <div class="iw"><input type="text" id="inst-mo" class="ri" value="23" oninput="onInstMo()"><span class="isfx">мес</span></div>
+          <div class="iw"><input type="text" id="inst-yr" class="ri" value="1.9" oninput="onInstYr()"><span class="isfx">лет</span></div>
+        </div>
+      </div>
+      <div class="fg">
+        <label class="lbl">График платежей по рассрочке</label>
+        <div style="font-size:11px;color:var(--tx2);margin-bottom:8px">Укажите месяцы с особыми платежами. Все остальные — по базовой ставке.</div>
+        <table class="rules-tbl">
+          <thead><tr><th>Месяцы (через запятую)</th><th>% от цены</th><th>Сумма ₽</th><th></th></tr></thead>
+          <tbody id="spec-body"></tbody>
+          <tfoot id="base-foot"></tfoot>
+        </table>
+        <button class="btn-link" onclick="addSpec()" style="margin-top:9px;font-size:12px">+ Добавить строку</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 4. Ипотека -->
+<div class="acc" id="A-mort">
+  <div class="acc-hdr" onclick="togAcc('mort')">
+    <div class="acc-ttl"><span class="acc-ico">🏦</span>Ипотека<span class="tag tag-on" id="mort-tag">вкл</span></div>
+    <div class="acc-arr open" id="arr-mort">▼</div>
+  </div>
+  <div class="acc-body open" id="body-mort">
+    <div class="togrow">
+      <span class="toglbl">Ипотека</span>
+      <label class="tog"><input type="checkbox" id="mort-on" checked onchange="onMortTog()"><span class="togsl"></span></label>
+    </div>
+
+    <div id="mort-fields" style="display:flex;flex-direction:column;gap:12px">
+      <div class="fg">
+        <label class="lbl">Срок ипотеки</label>
+        <div class="row2">
+          <div class="iw"><input type="text" id="mort-mo" class="ri" value="240" oninput="onMortMo()" onfocus="unfmt(this)" onblur="fmtf(this)"><span class="isfx">мес</span></div>
+          <div class="iw"><input type="text" id="mort-yr" class="ri" value="20" oninput="onMortYr()" onfocus="unfmt(this)" onblur="fmtf(this)"><span class="isfx">лет</span></div>
+        </div>
+      </div>
+      <div class="fg">
+        <label class="lbl">Льготные программы</label>
+        <div class="flex gap6 fw">
+          <button class="preset-btn" onclick="setPreset(8.5)">Рыночная 8.5%</button>
+          <button class="preset-btn" onclick="setPreset(6)">👨‍👩‍👧 Семейная 6%</button>
+          <button class="preset-btn" onclick="setPreset(5)">💻 IT 5%</button>
+          <button class="preset-btn" onclick="setPreset(2)">🌏 ДВ 2%</button>
+          <button class="preset-btn" onclick="setPreset(3)">🌾 Сельская 3%</button>
+        </div>
+      </div>
+      <div class="fg">
+        <label class="lbl">Ставки (изменения / рефинансирование)</label>
+        <div style="font-size:11px;color:var(--tx2);margin-bottom:8px">Месяц 1 = начало ипотеки. Добавьте строку при изменении ставки.</div>
+        <div id="rate-rows"></div>
+        <button class="btn-link" onclick="addRate()" style="font-size:12px">+ Добавить изменение ставки</button>
+      </div>
+      <div class="fg">
+        <label class="lbl">Тип платежей</label>
+        <div class="rtab">
+          <input type="radio" name="ptype" id="pt-ann" value="ann" checked><label for="pt-ann" onclick="setPT('ann')">Аннуитет</label>
+          <input type="radio" name="ptype" id="pt-dif" value="dif"><label for="pt-dif" onclick="setPT('dif')">Дифференцированный</label>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 5. Досрочные платежи -->
+<div class="acc" id="A-early">
+  <div class="acc-hdr" onclick="togAcc('early')">
+    <div class="acc-ttl"><span class="acc-ico">⚡</span>Досрочные платежи</div>
+    <div class="acc-arr" id="arr-early">▼</div>
+  </div>
+  <div class="acc-body" id="body-early">
+    <div style="font-size:12px;color:var(--tx2)">Единоразовые досрочные выплаты уменьшают остаток долга. Укажите месяц ипотеки и сумму.</div>
+    <div id="ep-rows"></div>
+    <button class="btn-link" onclick="addEP()" style="font-size:12px">+ Добавить досрочный платёж</button>
+  </div>
+</div>
+
+<!-- 5. Траншевая ипотека -->
+<div class="acc" id="A-tranche">
+  <div class="acc-hdr" onclick="togAcc('tranche')">
+    <div class="acc-ttl"><span class="acc-ico">📦</span>Траншевая ипотека<span class="tag tag-on" id="tranche-tag" style="display:none">вкл</span></div>
+    <div class="acc-arr" id="arr-tranche">▼</div>
+  </div>
+  <div class="acc-body" id="body-tranche">
+    <div class="alert a-info" style="font-size:11px;margin-bottom:4px">Минимальный платёж на период стройки (только % с 1-го транша), полный — после сдачи.</div>
+    <div class="togrow">
+      <span class="toglbl">Включить траншевую ипотеку</span>
+      <label class="tog"><input type="checkbox" id="tranche-on" onchange="onTrancheTog()"><span class="togsl"></span></label>
+    </div>
+    <div id="tranche-fields" style="display:none;flex-direction:column;gap:10px">
+      <div class="row2">
+        <div class="fg">
+          <label class="lbl">1-й транш, ₽ <span style="text-transform:none;font-weight:400">(стройка)</span></label>
+          <div class="iw"><input type="text" id="tr-amt1" class="ri" placeholder="500 000" oninput="recalc()" onfocus="unfmt(this)" onblur="fmtf(this)"><span class="isfx">₽</span></div>
+        </div>
+        <div class="fg">
+          <label class="lbl">Ставка 1-го транша, %</label>
+          <div class="iw"><input type="text" id="tr-rate1" class="ri" value="0.1" oninput="recalc()"><span class="isfx">%/год</span></div>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="fg">
+          <label class="lbl">Период стройки, мес</label>
+          <div class="iw"><input type="text" id="tr-build-mo" class="ri" value="24" oninput="recalc()"><span class="isfx">мес</span></div>
+        </div>
+        <div class="fg">
+          <label class="lbl">Ставка 2-го транша, %</label>
+          <div class="iw"><input type="text" id="tr-rate2" class="ri" value="6" oninput="recalc()"><span class="isfx">%/год</span></div>
+          <div style="font-size:10px;color:var(--tx2);margin-top:2px">Ставка после сдачи дома</div>
+        </div>
+      </div>
+      <div id="tr-result-box" style="display:none;padding:10px 13px;background:var(--blue2);border:1px solid #BFDBFE;border-radius:9px">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--blue);margin-bottom:4px">Платёж на период стройки</div>
+        <div style="font-size:20px;font-weight:800;color:var(--navy)" id="tr-pay1-val">—</div>
+        <div style="font-size:11px;color:var(--tx2);margin-top:2px" id="tr-pay2-info">После сдачи: —</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 6. Комби-ипотека -->
+<div class="acc" id="A-combi">
+  <div class="acc-hdr" onclick="togAcc('combi')">
+    <div class="acc-ttl"><span class="acc-ico">🔀</span>Комби-ипотека<span class="tag tag-on" id="combi-tag" style="display:none">вкл</span></div>
+    <div class="acc-arr" id="arr-combi">▼</div>
+  </div>
+  <div class="acc-body" id="body-combi">
+    <div class="alert a-info" style="font-size:11px;margin-bottom:4px">Льготная программа на часть суммы + рыночная ставка на остаток. Пример: 12 млн под 6% (Семейная) + 3 млн под 18%.</div>
+    <div class="togrow">
+      <span class="toglbl">Включить комби-ипотеку</span>
+      <label class="tog"><input type="checkbox" id="combi-on" onchange="onCombiTog()"><span class="togsl"></span></label>
+    </div>
+    <div id="combi-fields" style="display:none;flex-direction:column;gap:10px">
+      <div style="border:1.5px solid #BFDBFE;border-radius:10px;padding:10px 12px;background:#EFF6FF">
+        <div style="font-size:10px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">Льготная часть</div>
+        <div class="row2">
+          <div class="fg"><label class="lbl">Сумма, ₽</label>
+            <div class="iw"><input type="text" id="cb-amt1" class="ri" placeholder="12 000 000" oninput="recalc()" onfocus="unfmt(this)" onblur="fmtf(this)"><span class="isfx">₽</span></div>
+          </div>
+          <div class="fg"><label class="lbl">Ставка, %</label>
+            <div class="iw"><input type="text" id="cb-rate1" class="ri" value="6" oninput="recalc()"><span class="isfx">%</span></div>
+          </div>
+        </div>
+        <div class="flex gap5 fw" style="margin-top:7px">
+          <button class="preset-btn" style="font-size:11px;padding:4px 8px" onclick="document.getElementById('cb-rate1').value='6';recalc()">Семейная 6%</button>
+          <button class="preset-btn" style="font-size:11px;padding:4px 8px" onclick="document.getElementById('cb-rate1').value='5';recalc()">IT 5%</button>
+          <button class="preset-btn" style="font-size:11px;padding:4px 8px" onclick="document.getElementById('cb-rate1').value='2';recalc()">ДВ 2%</button>
+        </div>
+      </div>
+      <div style="border:1.5px solid var(--border);border-radius:10px;padding:10px 12px">
+        <div style="font-size:10px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">Рыночная часть</div>
+        <div class="row2">
+          <div class="fg"><label class="lbl">Сумма, ₽ <span style="text-transform:none;font-weight:400">(авто)</span></label>
+            <div class="iw"><input type="text" id="cb-amt2" class="ri" placeholder="авто" oninput="recalc()" onfocus="unfmt(this)" onblur="fmtf(this)"><span class="isfx">₽</span></div>
+            <div style="font-size:10px;color:var(--tx2);margin-top:2px" id="cb-amt2-hint">= остаток долга</div>
+          </div>
+          <div class="fg"><label class="lbl">Ставка, %</label>
+            <div class="iw"><input type="text" id="cb-rate2" class="ri" value="18" oninput="recalc()"><span class="isfx">%</span></div>
+          </div>
+        </div>
+      </div>
+      <div id="cb-result-box" style="display:none;padding:10px 13px;background:var(--blue2);border:1px solid #BFDBFE;border-radius:9px">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--blue);margin-bottom:4px">Комби-платёж / мес</div>
+        <div style="display:flex;gap:10px;align-items:baseline;flex-wrap:wrap">
+          <div><div style="font-size:10px;color:var(--tx2)">Льготная</div><div style="font-weight:800;color:var(--blue);font-size:15px" id="cb-pay1-val">—</div></div>
+          <span style="color:var(--tx3);font-size:16px">+</span>
+          <div><div style="font-size:10px;color:var(--tx2)">Рыночная</div><div style="font-weight:800;color:var(--navy);font-size:15px" id="cb-pay2-val">—</div></div>
+          <span style="color:var(--tx3);font-size:16px">=</span>
+          <div><div style="font-size:10px;color:var(--tx2)">Итого</div><div style="font-weight:800;color:var(--navy);font-size:20px" id="cb-pay-total">—</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- 6. Дополнительные расходы -->
+<div class="acc" id="A-extra" style="display:none">
+  <div class="acc-hdr" onclick="togAcc('extra')">
+    <div class="acc-ttl"><span class="acc-ico">📌</span>Дополнительные расходы</div>
+    <div class="acc-arr" id="arr-extra">▼</div>
+  </div>
+  <div class="acc-body" id="body-extra">
+    <div class="fg">
+      <label class="lbl">Страховка (% от остатка в год)</label>
+      <div class="iw"><input type="text" id="insur" class="ri" placeholder="0.30" oninput="recalc()" onfocus="unfmt(this)"><span class="isfx">%/год</span></div>
+      <div style="font-size:11px;color:var(--tx2)">Страхование жизни + имущества. Обычно 0.3–1%</div>
+    </div>
+    <div class="fg">
+      <label class="lbl">Разовые расходы при сделке, ₽</label>
+      <div class="iw"><input type="text" id="oneoff" class="ri" placeholder="150 000" oninput="recalc()" onfocus="unfmt(this)" onblur="fmtf(this)"><span class="isfx">₽</span></div>
+      <div style="font-size:11px;color:var(--tx2)">Нотариус, оценка, риелтор, комиссии</div>
+    </div>
+
+  </div>
+</div>
+
+
+<div style="padding:14px 12px 4px">
+  <button onclick="clearCalc()" style="width:100%;padding:9px 0;border:1.5px dashed var(--border2);border-radius:10px;background:transparent;color:var(--tx2);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:.15s;letter-spacing:.2px" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)';this.style.background='#FFF5F5'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--tx2)';this.style.background='transparent'">
+    ↺ Сбросить параметры
+  </button>
+</div>
+</aside>
+
+<main class="main">
+
+<div class="sums" id="sums">
+  <div class="sc cn"><div class="sc-lbl">Цена квартиры</div><div class="sc-val" id="sv-price">—</div><div class="sc-sub" id="sv-sqm">Введите данные</div></div>
+  <div class="sc cg"><div class="sc-lbl">Итоговая выплата</div><div class="sc-val" id="sv-total">—</div><div class="sc-sub" id="sv-opct">включая переплату</div></div>
+  <div class="sc cgr"><div class="sc-lbl">Платёж по ипотеке</div><div class="sc-val" id="sv-pay">—</div><div class="sc-sub" id="sv-paysub">начало ипотеки</div></div>
+  <div class="sc cr"><div class="sc-lbl">Переплата</div><div class="sc-val" id="sv-over">—</div><div class="sc-sub" id="sv-oversub">за всё время</div></div>
+</div>
+
+<div id="inst-bar" style="display:none" class="inst-bar">
+  <div class="inst-bar-item"><div class="inst-bar-lbl">Срок рассрочки</div><div class="inst-bar-val" id="ib-mo">—</div></div>
+  <div class="inst-bar-item"><div class="inst-bar-lbl">Базовый платёж</div><div class="inst-bar-val" id="ib-base">—</div></div>
+  <div class="inst-bar-item"><div class="inst-bar-lbl">Особые месяцы</div><div class="inst-bar-val" id="ib-spec">—</div></div>
+  <div class="inst-bar-item"><div class="inst-bar-lbl">Итого за рассрочку</div><div class="inst-bar-val" id="ib-total">—</div></div>
+  <div class="inst-bar-item"><div class="inst-bar-lbl">В ипотеку</div><div class="inst-bar-val" id="ib-rest">—</div></div>
+</div>
+
+<div class="card" style="flex:1">
+  <div class="tabs">
+    <div class="tab on" data-t="chart" onclick="setTab('chart')">📊 График</div>
+    <div class="tab" data-t="sched" onclick="setTab('sched')">📋 Платежи</div>
+    <div class="tab" data-t="vars" onclick="setTab('vars')">💾 Варианты</div>
+    <div class="tab" data-t="an" onclick="setTab('an')">📈 Аналитика</div>
+    <div class="tab" data-t="rvb" onclick="setTab('rvb')">🏠 Аренда vs Покупка</div>
+    <div class="tab" data-t="tax" onclick="setTab('tax')">💰 Налоговый вычет</div>
+  </div>
+
+  <div id="t-chart" style="padding:18px">
+    <div style="position:relative;height:270px"><canvas id="pay-chart"></canvas></div>
+    <div id="chart-legend" style="display:flex;justify-content:center;flex-wrap:wrap;margin:10px 0;font-size:12px;color:var(--tx2);gap:16px"></div>
+    <div id="dual-axis-note" style="display:none;font-size:11px;color:var(--tx2);text-align:center;margin-bottom:8px">
+      ⟵ левая ось: ипотека · правая ось: рассрочка ⟶
+    </div>
+    <div style="position:relative;height:190px"><canvas id="bal-chart"></canvas></div>
+  </div>
+
+  <div id="t-sched" style="display:none">
+    <div style="padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex-shrink:0">
+      <div class="rtab" style="width:auto">
+        <input type="radio" name="sf" id="sf-all" value="all" checked><label for="sf-all" onclick="setSF('all')">Все</label>
+        <input type="radio" name="sf" id="sf-i" value="i"><label for="sf-i" onclick="setSF('i')">Рассрочка</label>
+        <input type="radio" name="sf" id="sf-m" value="m"><label for="sf-m" onclick="setSF('m')">Ипотека</label>
+      </div>
+      <span style="margin-left:auto;font-size:12px;color:var(--tx2)" id="sched-cnt"></span>
+    </div>
+    <div style="overflow:auto;max-height:calc(100vh - 260px)">
+      <table class="scht">
+        <thead><tr><th>№</th><th>Фаза</th><th>Платёж</th><th>Тело</th><th>Проценты</th><th>Страховка</th><th>Остаток</th></tr></thead>
+        <tbody id="sched-body"></tbody>
+        <tfoot><tr id="sched-foot" style="display:none">
+          <td colspan="2">Итого</td><td id="ft-pay">—</td><td id="ft-pri">—</td><td id="ft-int">—</td><td id="ft-ins">—</td><td>—</td>
+        </tr></tfoot>
+      </table>
+    </div>
+    <div class="pager" id="pager"></div>
+  </div>
+
+  <div id="t-vars" style="display:none;padding:18px">
+    <div class="flex ac jb fw gap6" style="margin-bottom:15px">
+      <span style="font-size:12px;color:var(--tx2);font-weight:600">Сохранённые варианты расчётов</span>
+      <div class="flex gap6 fw">
+        <button class="btn btn-green btn-sm" onclick="xlExport()">📊 Excel</button>
+        <button class="btn btn-navy btn-sm" onclick="exportPdfCompare()">📄 PDF сравнение</button>
+      </div>
+    </div>
+    <div id="vlist"></div>
+    <div id="cmp-wrap" style="display:none;margin-top:20px">
+      <div class="secttl">Сравнение вариантов</div>
+      <div style="overflow-x:auto"><table class="cmpt" id="cmpt"></table></div>
+      <div style="margin-top:7px;font-size:11px;color:var(--green)">🟢 Выделено лучшее значение в строке</div>
+    </div>
+    <div id="vc-wrap" style="display:none;margin-top:24px">
+      <div class="secttl">Ежемесячные платежи по вариантам</div>
+      <div style="font-size:12px;color:var(--tx2);margin-bottom:10px">Каждая линия — один вариант. Рассрочка: пики слева, ипотека: плато справа.</div>
+      <div style="position:relative;height:240px;margin-bottom:22px"><canvas id="vc-pay-chart"></canvas></div>
+      <div class="secttl">Остаток долга по вариантам</div>
+      <div style="position:relative;height:190px"><canvas id="vc-bal-chart"></canvas></div>
+    </div>
+  </div>
+
+  <div id="t-an" style="display:none;padding:18px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+      <div style="font-size:15px;font-weight:800;color:var(--navy)">Аналитика</div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap">
+        <button class="btn btn-ghost btn-sm" onclick="exportPdfVariant()" title="КП по текущему расчёту">📄 КП для клиента</button>
+        <button class="btn btn-ghost btn-sm" onclick="exportPdfCompare()" title="Сравнение сохранённых вариантов">📊 Сравнение PDF</button>
+      </div>
+    </div>
+    <div class="an2" id="an-content">
+      <div class="empty"><div class="empty-ico">📈</div><div class="empty-ttl">Введите данные</div></div>
+    </div>
+    </div>
+  </div>
+
+  <div id="t-rvb" style="display:none;padding:18px">
+    <div style="margin-bottom:16px">
+      <div class="secttl">Сравнение: снимать или покупать?</div>
+    </div>
+    <div class="row2" style="max-width:520px;margin-bottom:18px;align-items:end">
+      <div class="fg">
+        <label class="lbl">Аренда аналогичной квартиры, ₽/мес</label>
+        <div class="iw"><input type="text" id="rent-mo" class="ri" placeholder="60 000" oninput="calcRVBSafe()" onfocus="unfmt(this)" onblur="fmtf(this)"><span class="isfx">₽</span></div>
+      </div>
+      <div class="fg">
+        <label class="lbl">Рост аренды в год, %</label>
+        <div class="iw"><input type="text" id="rent-idx" class="ri" value="5" oninput="calcRVBSafe()"><span class="isfx">%/год</span></div>
+      </div>
+    </div>
+    <div id="rvb-result">
+      <div class="empty"><div class="empty-ico">🏠</div><div class="empty-ttl">Введите размер аренды</div></div>
+    </div>
+  </div>
+
+  <div id="t-tax" style="display:none;padding:18px">
+    <div class="secttl" style="margin-bottom:16px">Налоговый вычет при покупке — ст. 220 НК РФ</div>
+
+    <!-- Owners -->
+    <div style="background:#f0f4ff;border-radius:12px;padding:14px 16px;margin-bottom:16px">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--navy);margin-bottom:12px">Собственники</div>
+      <div id="tax-owners-wrap" style="display:flex;flex-direction:column;gap:10px"></div>
+      <button class="btn-link" onclick="addTaxOwner()" style="font-size:12px;margin-top:10px">+ Добавить собственника</button>
+    </div>
+
+    <!-- NDFL rate -->
+    <div class="row2" style="margin-bottom:14px;gap:10px">
+      <div class="fg">
+        <label class="lbl">Ставка НДФЛ <span style="text-transform:none;font-weight:400">(прогрессивная с 2025)</span></label>
+        <select id="tax-ndfl" onchange="calcTax()">
+          <option value="13">13% (доход до 2,4 млн/год)</option>
+          <option value="15">15% (2,4–5 млн/год)</option>
+          <option value="18">18% (5–20 млн/год)</option>
+          <option value="20">20% (20–50 млн/год)</option>
+          <option value="22">22% (свыше 50 млн/год)</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label class="lbl">Год покупки</label>
+        <select id="tax-year" onchange="calcTax()">
+          <option value="2014">2014–2024 (лимит 2 млн)</option>
+          <option value="2025" selected>2025+ (лимит 2 млн)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div id="tax-result">
+      <div class="empty"><div class="empty-ico">💰</div><div class="empty-ttl">Введите данные расчёта</div></div>
+    </div>
+
+    <!-- Info block -->
+    <div class="alert a-info" style="margin-top:16px;font-size:12px;line-height:1.6">
+      <strong>Как работает вычет:</strong><br>
+      • <strong>Имущественный</strong> — 13–22% от стоимости жилья, лимит 2 000 000 ₽ на человека. Можно добирать на разных объектах (если куплено после 2014 г.).<br>
+      • <strong>По ипотечным процентам</strong> — 13–22% от уплаченных %, лимит 3 000 000 ₽ на человека. <strong>Только раз в жизни на один объект.</strong><br>
+      • При общей совместной собственности супруги могут распределить вычет по заявлению в любой пропорции.<br>
+      • Вычет можно получать ежегодно по мере уплаты налогов (через декларацию или у работодателя).
+    </div>
+  </div>
+
+  <!-- TAB: Clients CRM -->
+  
+
+</div>
+</main>
+</div>
+
+<!-- MODAL: Save -->
+<div class="modal-bg" id="modal-save" style="display:none" onclick="if(event.target===this)closeModal('modal-save')">
+  <div class="modal">
+    <div class="modal-ttl">Сохранить вариант</div>
+    <div class="modal-sub">Название поможет быстро найти нужный расчёт</div>
+    <!-- save-mode-wrap populated dynamically -->
+    <div id="save-mode-wrap"></div>
+    <div class="fg" id="save-name-wrap"><label class="lbl">Название</label>
+      <input type="text" id="vname-inp" placeholder="ЖК Панорама, 3к, 85 м²" maxlength="60" onkeydown="if(event.key==='Enter')doSave()">
+    </div>
+    <div class="modal-acts">
+      <button class="btn btn-ghost" onclick="closeModal('modal-save')" style="flex:1">Отмена</button>
+      <button class="btn btn-navy" onclick="doSave()" style="flex:2">💾 Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Import -->
+<div class="modal-bg" id="modal-import" style="display:none" onclick="if(event.target===this)closeModal('modal-import')">
+  <div class="modal">
+    <div class="modal-ttl">Импорт вариантов</div>
+    <div class="modal-sub">Вставьте JSON с другого устройства или выберите файл</div>
+    <div class="fg"><label class="lbl">JSON-данные</label>
+      <textarea id="import-txt" style="min-height:90px;font-size:12px;font-family:monospace" placeholder='[{"name":"..."}]'></textarea>
+    </div>
+    <div class="modal-acts">
+      <button class="btn btn-ghost" onclick="closeModal('modal-import')" style="flex:1">Отмена</button>
+      <button class="btn btn-navy" onclick="doImport()" style="flex:2">📥 Импортировать</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Variant Detail -->
+<div class="modal-bg" id="modal-vdet" style="display:none" onclick="if(event.target===this)closeModal('modal-vdet')">
+  <div class="modal modal-lg">
+    <div id="vdet-content"></div>
+    <div class="modal-acts">
+      <button class="btn btn-ghost" onclick="closeModal('modal-vdet')" style="flex:1">Закрыть</button>
+      <button class="btn btn-navy" id="vdet-load-btn" style="flex:2">↑ Загрузить для редактирования</button>
+    </div>
+  </div>
+</div>
+
+
+
+<input type="file" id="file-in" accept=".json" style="display:none" onchange="onFile(event)">
+<div id="pdf-frame"></div>
+
+<!-- MODAL: Realtor Info -->
+<div class="modal-bg" id="modal-realtor" style="display:none" onclick="if(event.target===this)closeModal('modal-realtor')">
+  <div class="modal">
+    <div class="modal-ttl">Контакты риелтора</div>
+    <div class="modal-sub">Данные отображаются в PDF-выгрузках</div>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:16px">
+      <div class="fg"><label class="lbl">ФИО риелтора</label>
+        <input type="text" id="rl-name" placeholder="Иванова Мария Петровна">
+      </div>
+      <div class="row2">
+        <div class="fg"><label class="lbl">Телефон</label>
+          <input type="text" id="rl-phone" placeholder="+7 999 123-45-67">
+        </div>
+        <div class="fg"><label class="lbl">Email</label>
+          <input type="text" id="rl-email" placeholder="agent@realty.ru">
+        </div>
+      </div>
+      <div class="fg"><label class="lbl">Агентство <span style="text-transform:none;font-weight:400;color:var(--tx3)">(опционально)</span></label>
+        <input type="text" id="rl-agency" placeholder="Агентство недвижимости «Название»">
+      </div>
+      <div class="fg"><label class="lbl">Лого агентства <span style="text-transform:none;font-weight:400;color:var(--tx3)">(опционально)</span></label>
+        <div id="rl-logo-wrap" style="display:none;margin-bottom:6px">
+          <img id="rl-logo-preview" src="" alt="Лого" style="max-height:60px;border-radius:6px;border:1px solid var(--border)">
+          <button onclick="clearRealtorLogo()" class="btn-link" style="margin-left:8px;font-size:11px">удалить</button>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('rl-logo-file').click()">🖼 Загрузить лого</button>
+        <input type="file" id="rl-logo-file" accept="image/*" style="display:none" onchange="onRealtorLogo(event)">
+      </div>
+    </div>
+    <div class="modal-acts">
+      <button class="btn btn-ghost" onclick="closeModal('modal-realtor')" style="flex:1">Отмена</button>
+      <button class="btn btn-navy" onclick="saveRealtorInfo()" style="flex:2">💾 Сохранить</button>
+    </div>
+  </div>
+</div>
+<script>
+// ═══════════ STATE ═══════════
+let dpMode='a', payType='ann', schFlt='all', schPage=1;
+const PAGE=20;
+let CR=null;
+let SVs=[];
+try{SVs=JSON.parse(localStorage.getItem('apt3')||'[]');}catch(e){}
+let specRules=[{months:'12, 18',rate:'5'}];
+let rateRows=[{from:1,rate:'8.5'}];
+let earlyPayments=[];  // [{mortMonth, amount, type:'pay'|'term'}]
+let payC=null, balC=null, vcPayC=null, vcBalC=null;
+
+// ═══════════ CHART.JS PLUGIN — background regions ═══════════
+// Register datalabels plugin (auto-hides overlapping labels)
+Chart.register(ChartDataLabels);
+
+// Broken-bar plugin: draws zig-zag indicator + true-value label on bars capped by Y-axis max
+Chart.register({
+  id:'brokenBar',
+  afterDatasetsDraw(chart,args,opts){
+    if(!opts||!opts.items||!opts.items.length)return;
+    const{ctx,chartArea,scales}=chart;
+    if(!scales.y)return;
+    opts.items.forEach(({barIdx,trueVal})=>{
+      // Find bar x,w from first dataset that has data at this index
+      let bx,bw;
+      for(let di=0;di<chart.data.datasets.length;di++){
+        const m=chart.getDatasetMeta(di);
+        if(m.data[barIdx]&&m.data[barIdx].width){
+          bx=m.data[barIdx].x;bw=m.data[barIdx].width;break;
+        }
+      }
+      if(bx===undefined)return;
+      ctx.save();
+      const yT=chartArea.top;
+      const zig=6; // zigzag amplitude
+      const steps=Math.max(3,Math.floor(bw/4));
+      const sw=bw/steps;
+      // Gold fill at top of clipped bar
+      ctx.fillStyle='rgba(184,134,42,0.9)';
+      ctx.fillRect(bx-bw/2,yT,bw,zig*2.5);
+      // White zigzag strip
+      ctx.fillStyle='#fff';
+      ctx.beginPath();
+      ctx.moveTo(bx-bw/2,yT+zig*1.5);
+      for(let i=0;i<=steps;i++){
+        ctx.lineTo(bx-bw/2+i*sw,yT+zig*(i%2===0?2.5:0.5));
+      }
+      ctx.lineTo(bx+bw/2,yT+zig*1.5);
+      ctx.lineTo(bx+bw/2,yT);
+      ctx.lineTo(bx-bw/2,yT);
+      ctx.closePath();
+      ctx.fill();
+      // Value label inside chart area, below zigzag
+      ctx.fillStyle='#5C3000';
+      ctx.font=`bold 9px -apple-system,sans-serif`;
+      ctx.textAlign='center';
+      ctx.textBaseline='top';
+      if(opts.fmt) ctx.fillText(opts.fmt(trueVal),bx,yT+zig*2.8);
+      ctx.restore();
+    });
+  }
+});
+Chart.defaults.set('plugins.datalabels', { display: false }); // off by default
+
+Chart.register({
+  id:'bgRegion',
+  beforeDraw(chart,args,opts){
+    if(!opts||!opts.regions)return;
+    const{ctx,chartArea}=chart;
+    const meta=chart.getDatasetMeta(0);
+    if(!meta||!meta.data||!meta.data.length)return;
+    ctx.save();
+    opts.regions.forEach(reg=>{
+      const from=Math.max(0,reg.from);
+      const to=Math.min(reg.to,meta.data.length-1);
+      if(from>to)return;
+      const w=meta.data[from].width||6;
+      const x1=meta.data[from].x-w/2-1;
+      const x2=meta.data[to].x+w/2+1;
+      ctx.fillStyle=reg.bg;
+      ctx.fillRect(x1,chartArea.top,x2-x1,chartArea.height);
+      if(reg.label&&(x2-x1)>50){
+        ctx.fillStyle=reg.lc;
+        ctx.font='bold 11px -apple-system,sans-serif';
+        ctx.fillText(reg.label,x1+6,chartArea.top+16);
+      }
+    });
+    ctx.restore();
+  }
+});
+
+// ═══════════ NUMBER HELPERS ═══════════
+const pn=s=>parseFloat(String(s||0).replace(/[\s ]+/g,'').replace(',','.'))||0;
+const fmt=n=>(Math.round(n)||0).toLocaleString('ru-RU');
+const fmtd=(n,d=1)=>(+n||0).toLocaleString('ru-RU',{minimumFractionDigits:d,maximumFractionDigits:d});
+function fmtf(el){const v=pn(el.value);if(v)el.value=fmt(v);}
+function unfmt(el){const v=pn(el.value);el.value=v||'';}
+
+// ═══════════ ACCORDION ═══════════
+function togAcc(id){
+  const body=document.getElementById('body-'+id);
+  const arr=document.getElementById('arr-'+id);
+  const open=body.classList.contains('open');
+  body.classList.toggle('open',!open);
+  body.style.display=open?'none':'flex';
+  arr.classList.toggle('open',!open);
+}
+
+// ═══════════ PRICE / DOWN PAYMENT ═══════════
+function getPrice(){return pn(document.getElementById('price').value);}
+function getDp(){
+  const pr=getPrice(),mc=pn(document.getElementById('matcap').value);
+  let dp=dpMode==='a'?pn(document.getElementById('dp-amt').value):pr*pn(document.getElementById('dp-pct').value)/100;
+  return Math.max(0,dp+mc);
+}
+function onPriceIn(){syncDp();calcPA();recalc();}
+function setDp(m){
+  dpMode=m;
+  document.getElementById('dp-aw').style.display=m==='a'?'':'none';
+  document.getElementById('dp-pw').style.display=m==='p'?'':'none';
+  syncDp();recalc();
+}
+function onDpIn(){syncDp();recalc();}
+function syncDp(){
+  const pr=getPrice(),mc=pn(document.getElementById('matcap').value);
+  if(!pr){document.getElementById('dpbox').style.display='none';return;}
+  let amt,pct;
+  if(dpMode==='a'){amt=pn(document.getElementById('dp-amt').value)+mc;pct=pr>0?amt/pr*100:0;}
+  else{pct=pn(document.getElementById('dp-pct').value);amt=pr*pct/100+mc;}
+  const rest=Math.max(0,pr-amt);
+  document.getElementById('dpbox').style.display='flex';
+  document.getElementById('dp-sv-a').textContent=fmt(amt)+' ₽';
+  document.getElementById('dp-sv-p').textContent=fmtd(pct,1)+'%';
+  document.getElementById('dp-sv-r').textContent=fmt(rest)+' ₽';
+  updateTaxBox(pr,amt);
+}
+function updateTaxBox(pr,dp){ /* elements removed */ }
+
+// ═══════════ INSTALLMENT ═══════════
+function onInstTog(){
+  const on=document.getElementById('inst-on').checked;
+  document.getElementById('inst-fields').style.display=on?'flex':'none';
+  document.getElementById('inst-tag').style.display=on?'':'none';
+  recalc();
+}
+function onInstMo(){
+  const v=pn(document.getElementById('inst-mo').value);
+  document.getElementById('inst-yr').value=fmtd(v/12,1);
+  recalc();
+}
+function onInstYr(){
+  const v=pn(document.getElementById('inst-yr').value);
+  document.getElementById('inst-mo').value=Math.round(v*12);
+  recalc();
+}
+function getBaseRate(){return pn(document.getElementById('base-rate-inp')?.value||'0.05');}
+function getInstPay(monthNum,price){
+  for(const r of specRules){
+    const ms=r.months.split(',').map(s=>parseInt(s.trim())).filter(n=>n>0&&!isNaN(n));
+    if(ms.includes(monthNum))return price*pn(r.rate)/100;
+  }
+  return price*getBaseRate()/100;
+}
+
+// FIX: don't rebuild DOM if user is typing in the rules table
+function renderRules(){
+  const pr=getPrice();
+  const focused=document.activeElement;
+  const sb=document.getElementById('spec-body');
+  const bf=document.getElementById('base-foot');
+  if(sb&&bf&&(sb.contains(focused)||bf.contains(focused))){
+    // Only update computed amounts, preserve focus
+    document.querySelectorAll('#spec-body .computed-amt').forEach((el,i)=>{
+      if(i<specRules.length) el.textContent=pr?fmt(pr*pn(specRules[i].rate)/100)+' ₽':'—';
+    });
+    const ba=document.querySelector('#base-foot .computed-amt');
+    if(ba) ba.textContent=pr?fmt(pr*getBaseRate()/100)+' ₽':'—';
+    return;
+  }
+  // Full rebuild
+  sb.innerHTML=specRules.map((r,i)=>{
+    const specPay=pr?pr*pn(r.rate)/100:0;
+    return `<tr>
+      <td><input type="text" value="${r.months}" placeholder="напр: 12, 18"
+        oninput="specRules[${i}].months=this.value;renderRules();recalc()" style="width:100%"></td>
+      <td><div class="iw" style="max-width:80px">
+        <input type="text" class="ri" value="${r.rate}" placeholder="5"
+          oninput="specRules[${i}].rate=this.value;renderRules();recalc()" style="width:100%">
+        <span class="isfx" style="font-size:11px">%</span>
+      </div></td>
+      <td><span class="computed-amt">${pr?fmt(specPay)+' ₽':'—'}</span></td>
+      <td><button class="del-btn" onclick="delSpec(${i})">×</button></td>
+    </tr>`;
+  }).join('');
+  const baseAmt=pr?pr*getBaseRate()/100:0;
+  const baseVal=document.getElementById('base-rate-inp')?.value||'0.05';
+  bf.innerHTML=`<tr class="base-row">
+    <td><span class="base-lbl">Все остальные месяцы</span></td>
+    <td><div class="iw" style="max-width:80px">
+      <input type="text" id="base-rate-inp" class="ri" value="${baseVal}" placeholder="0.05"
+        oninput="renderRules();recalc()" style="width:100%">
+      <span class="isfx" style="font-size:11px">%</span>
+    </div></td>
+    <td><span class="computed-amt">${pr?fmt(baseAmt)+' ₽':'—'}</span></td>
+    <td></td>
+  </tr>`;
+}
+function addSpec(){specRules.push({months:'',rate:'5'});renderRules();recalc();}
+function delSpec(i){specRules.splice(i,1);renderRules();recalc();}
+
+// ═══════════ MORTGAGE RATE ROWS ═══════════
+function setPreset(rate){
+  rateRows=[{from:1,rate:String(rate)}];
+  renderRateRows();recalc();
+}
+function onMortTog(){
+  const on=document.getElementById('mort-on').checked;
+  document.getElementById('mort-fields').style.display=on?'flex':'none';
+  document.getElementById('mort-tag').style.display=on?'':'none';
+  recalc();
+}
+function onMortMo(){const v=pn(document.getElementById('mort-mo').value);document.getElementById('mort-yr').value=fmtd(v/12,1);recalc();}
+function onMortYr(){const v=pn(document.getElementById('mort-yr').value);document.getElementById('mort-mo').value=Math.round(v*12);recalc();}
+function setPT(t){payType=t;recalc();}
+
+function renderRateRows(){
+  document.getElementById('rate-rows').innerHTML=rateRows.map((r,i)=>`
+    <div class="rate-row">
+      <div class="fg">
+        <label class="lbl">С месяца</label>
+        <input type="text" class="ri" value="${r.from}" ${i===0?'disabled style="background:#F8FAFD"':''}
+          oninput="rateRows[${i}].from=parseInt(this.value)||1;recalc()">
+      </div>
+      <div class="fg">
+        <label class="lbl">Ставка, %</label>
+        <div class="iw"><input type="text" class="ri" value="${r.rate}" oninput="rateRows[${i}].rate=this.value;recalc()"><span class="isfx">%</span></div>
+      </div>
+      <button class="del-btn" onclick="delRate(${i})" style="align-self:flex-end;margin-bottom:2px" ${i===0?'disabled style="opacity:0"':''}>×</button>
+    </div>`).join('');
+}
+function addRate(){const last=rateRows[rateRows.length-1];rateRows.push({from:(last.from||1)+36,rate:'7.0'});renderRateRows();recalc();}
+function delRate(i){if(i===0)return;rateRows.splice(i,1);renderRateRows();recalc();}
+function getRateAt(mm){
+  const sorted=[...rateRows].sort((a,b)=>a.from-b.from);
+  let rate=pn(sorted[0].rate);
+  for(const r of sorted){if(mm>=(r.from||1))rate=pn(r.rate);}
+  return rate;
+}
+
+// ═══════════ EARLY PAYMENTS ═══════════
+function renderEP(){
+  const c=document.getElementById('ep-rows');
+  if(!earlyPayments.length){c.innerHTML='';return;}
+  c.innerHTML=earlyPayments.map((ep,i)=>`
+    <div class="ep-row">
+      <div class="fg"><label class="lbl">Мес. ипот.</label>
+        <input type="text" class="ri" value="${ep.mortMonth}" placeholder="36"
+          oninput="earlyPayments[${i}].mortMonth=parseInt(this.value)||1;recalc()">
+      </div>
+      <div class="fg"><label class="lbl">Сумма, ₽</label>
+        <input type="text" class="ri" value="${ep.amount?fmt(ep.amount):''}" placeholder="500 000"
+          onfocus="this.value=earlyPayments[${i}].amount||''"
+          onblur="if(this.value)this.value=fmt(parseFloat(this.value.replace(/[^0-9.]/g,''))||0)"
+          oninput="earlyPayments[${i}].amount=parseFloat(this.value.replace(/[^0-9.]/g,''))||0;recalc()">
+      </div>
+      <div class="fg"><label class="lbl">Уменьшить</label>
+        <select oninput="earlyPayments[${i}].type=this.value;recalc()">
+          <option value="term" ${ep.type==='term'?'selected':''}>Срок</option>
+          <option value="pay" ${ep.type==='pay'?'selected':''}>Платёж</option>
+        </select>
+      </div>
+      <button class="del-btn" onclick="delEP(${i})" style="align-self:flex-end">×</button>
+    </div>`).join('');
+}
+function addEP(){earlyPayments.push({mortMonth:12,amount:0,type:'term'});renderEP();recalc();}
+function delEP(i){earlyPayments.splice(i,1);renderEP();recalc();}
+
+// ═══════════ CORE CALC ═══════════
+function recalc(){
+  syncDp();renderRules();calcRVB();
+  const price=getPrice(),dp=getDp();
+  if(!price||price<=0){CR=null;renderAll(null);return;}
+
+  const finishing=pn(document.getElementById('finishing').value);
+  const oneoff=pn(document.getElementById('oneoff').value);
+  const insurPct=pn(document.getElementById('insur').value)/100/12;
+
+  let bal=Math.max(0,price-dp);
+  const sch=[];
+  let instTotal=0;
+
+  // INSTALLMENT
+  const instOn=document.getElementById('inst-on').checked;
+  if(instOn){
+    const mo=Math.max(1,Math.round(pn(document.getElementById('inst-mo').value)));
+    for(let m=1;m<=mo&&bal>0.5;m++){
+      const pay=Math.min(getInstPay(m,price),bal);
+      bal=Math.max(0,bal-pay);
+      instTotal+=pay;
+      sch.push({month:m,phase:'inst',pay,pri:pay,int:0,ins:0,bal});
+    }
+  }
+
+  // MORTGAGE
+  const mortOn=document.getElementById('mort-on').checked;
+  const mortTerm=Math.max(1,Math.round(pn(document.getElementById('mort-mo').value)));
+  let firstPay=0;
+  // Build early payments map: mortMonth → amount
+  const epMap={};
+  earlyPayments.forEach(ep=>{
+    if(ep.mortMonth>0&&ep.amount>0) epMap[ep.mortMonth]=(epMap[ep.mortMonth]||0)+ep.amount;
+  });
+
+  if(mortOn&&bal>0.5){
+    // ─── Read tranche / combi settings ───
+    const trOn = trancheOn && document.getElementById('tranche-on')?.checked;
+    const cbOn = combiOn   && document.getElementById('combi-on')?.checked;
+
+    // ─── COMBI MORTGAGE ───────────────────────────────────────────────────
+    if(cbOn){
+      const cbAmt1Raw = pn(document.getElementById('cb-amt1').value)||0;
+      const cbAmt1 = Math.min(cbAmt1Raw, bal);
+      const cbAmt2Raw = pn(document.getElementById('cb-amt2').value)||0;
+      const cbAmt2 = cbAmt2Raw>0 ? Math.min(cbAmt2Raw, bal-cbAmt1) : Math.max(0, bal-cbAmt1);
+      const cbR1 = (+document.getElementById('cb-rate1').value||6)/100/12;
+      const cbR2 = (+document.getElementById('cb-rate2').value||18)/100/12;
+      const hint = document.getElementById('cb-amt2-hint');
+      if(hint) hint.textContent = '= ' + fmt(Math.round(cbAmt2)) + ' ₽ (остаток)';
+
+      function annPay(b,r,n){ if(n<=0||b<=0)return 0; if(r<0.00001)return b/n; const f=Math.pow(1+r,n); return b*r*f/(f-1); }
+
+      let bal1=cbAmt1, bal2=cbAmt2;
+      let mortEnd=mortTerm;
+      for(let mm=1;mm<=mortEnd&&(bal1+bal2)>0.5;mm++){
+        const rem=mortEnd-mm+1;
+        // Part 1
+        let pay1=0,pri1=0,int1=0;
+        if(bal1>0.5){
+          int1=bal1*cbR1; pri1=annPay(bal1,cbR1,rem)-int1; if(pri1>=bal1){pri1=bal1;}
+          pay1=pri1+int1; bal1=Math.max(0,bal1-pri1);
+        }
+        // Part 2
+        let pay2=0,pri2=0,int2=0;
+        if(bal2>0.5){
+          int2=bal2*cbR2; pri2=annPay(bal2,cbR2,rem)-int2; if(pri2>=bal2){pri2=bal2;}
+          pay2=pri2+int2; bal2=Math.max(0,bal2-pri2);
+        }
+        const pay=pay1+pay2, pri=pri1+pri2, intT=int1+int2;
+        const ins=(bal1+bal2)*insurPct;
+        bal=Math.max(0,bal1+bal2);
+        if(mm===1)firstPay=pay;
+        sch.push({month:sch.length+1,mortMonth:mm,phase:'mort',pay,pri,int:intT,ins,bal,rate:(cbAmt1>0?cbR1*12*100:cbR2*12*100)});
+      }
+      bal=0;
+    }
+
+    // ─── TRANCHE MORTGAGE ─────────────────────────────────────────────────
+    else if(trOn){
+      const trAmt1 = Math.min(pn(document.getElementById('tr-amt1').value)||0, bal);
+      const trBuildMo = Math.max(1, Math.round(+document.getElementById('tr-build-mo').value||24));
+      const trR1 = (+document.getElementById('tr-rate1').value||0.1)/100/12;
+      const trR2 = (+document.getElementById('tr-rate2').value||6)/100/12;
+
+      // Phase 1: interest-only on first tranche
+      const pay1 = trAmt1 * trR1;
+      for(let mm=1; mm<=trBuildMo; mm++){
+        const ins=bal*insurPct;
+        sch.push({month:sch.length+1,mortMonth:mm,phase:'mort',pay:pay1,pri:0,int:pay1,ins,bal,rate:trR1*12*100});
+        if(mm===1) firstPay=pay1;
+      }
+
+      // Phase 2: full annuity on bal at trR2
+      const mortEnd2 = mortTerm; // full term from delivery
+      let mortBal2 = bal;
+      for(let mm=1; mm<=mortEnd2&&mortBal2>0.5; mm++){
+        const rem=mortEnd2-mm+1;
+        const r=trR2;
+        let pay,int,pri;
+        if(r<0.00001){pay=mortBal2/rem;int=0;pri=pay;}
+        else{const f=Math.pow(1+r,rem);pay=mortBal2*r*f/(f-1);int=mortBal2*r;pri=pay-int;}
+        if(pri>=mortBal2){pri=mortBal2;pay=pri+int;}
+        const ins=mortBal2*insurPct;
+        mortBal2=Math.max(0,mortBal2-pri);
+        const globalMm=trBuildMo+mm;
+        if(globalMm===trBuildMo+1)firstPay=pay;
+        sch.push({month:sch.length+1,mortMonth:globalMm,phase:'mort',pay,pri,int,ins,bal:mortBal2,rate:trR2*12*100});
+      }
+      bal=0;
+    }
+
+    // ─── STANDARD MORTGAGE ────────────────────────────────────────────────
+    else{
+      let mortEnd=mortTerm;
+      for(let mm=1;mm<=mortEnd&&bal>0.5;mm++){
+        const rem=mortEnd-mm+1;
+        const annRate=getRateAt(mm);
+        const r=annRate/100/12;
+        let pay,int,pri;
+        if(payType==='ann'){
+          if(r<0.00001){pay=bal/rem;int=0;pri=pay;}
+          else{const f=Math.pow(1+r,rem);pay=bal*r*f/(f-1);int=bal*r;pri=pay-int;}
+        } else {
+          pri=bal/rem;int=bal*r;pay=pri+int;
+        }
+        if(pri>=bal){pri=bal;pay=pri+int;}
+        const ins=bal*insurPct;
+        bal=Math.max(0,bal-pri);
+        if(mm===1)firstPay=pay;
+        sch.push({month:sch.length+1,mortMonth:mm,phase:'mort',pay,pri,int,ins,bal,rate:annRate});
+        if(epMap[mm]&&bal>0.5){
+          const ep=Math.min(epMap[mm],bal);
+          const epType=earlyPayments.find(e=>e.mortMonth===mm)?.type||'term';
+          bal=Math.max(0,bal-ep);
+          sch.push({month:sch.length+1,mortMonth:mm,phase:'mort',pay:ep,pri:ep,int:0,ins:0,bal,rate:annRate,isEarly:true});
+          if(epType==='term'&&r>=0.00001&&bal>0.5){
+            const newN=Math.ceil(-Math.log(Math.max(1e-9,1-r*bal/Math.max(pay,0.01)))/Math.log(1+r));
+            mortEnd=mm+Math.max(1,newN);
+          }
+        }
+      }
+    }
+  }
+
+  const totPay=dp+sch.reduce((s,r)=>s+r.pay,0)+oneoff+finishing;
+  const totInt=sch.filter(r=>r.phase==='mort').reduce((s,r)=>s+r.int,0);
+  const totIns=sch.reduce((s,r)=>s+(r.ins||0),0);
+  const overpay=totPay-price;
+  const mortBal=Math.max(0,price-dp-instTotal);
+
+  CR={floorPlan:floorPlanB64,price,dp,dpPct:price>0?dp/price*100:0,
+    finishing,oneoff,sch,instTotal,mortBal,firstPay,
+    totPay,totInt,totIns,overpay,instOn,mortOn,mortTerm};
+
+  renderAll(CR);
+}
+
+// ═══════════ RENDER ALL ═══════════
+function renderAll(r){
+  renderSummary(r);
+  renderInstBar(r);
+  renderChart(r);
+  renderSched(r);
+  renderAnalytics(r);
+  calcRVB();
+  updateAccStates();
+  // Tranche / Combi previews
+  const _mortMo = document.getElementById('mort-mo');
+  const _mortTerm = _mortMo ? (+_mortMo.value||240) : 240;
+  const _mortBal = r ? (r.mortBal||0) : 0;
+  calcTranchePreview(_mortBal, _mortTerm);
+  calcCombiPreview(_mortBal, _mortTerm);
+}
+
+function renderSummary(r){
+  if(!r){
+    ['sv-price','sv-total','sv-pay','sv-over'].forEach(id=>document.getElementById(id).textContent='—');
+    document.getElementById('sv-sqm').textContent='Введите данные';
+    const mab=document.getElementById('mort-amt-box');
+    if(mab) mab.style.display='none';
+    return;
+  }
+  const area=pn(document.getElementById('r-area').value);
+  document.getElementById('sv-price').textContent=fmt(r.price)+' ₽';
+  document.getElementById('sv-sqm').textContent=area?`${area} м² · ${fmt(r.price/area)} ₽/м²`:'Стоимость квартиры';
+  document.getElementById('sv-total').textContent=fmt(r.totPay)+' ₽';
+  const opct=r.price>0?r.overpay/r.price*100:0;
+  document.getElementById('sv-opct').textContent=`переплата: ${fmtd(opct,1)}%`;
+  document.getElementById('sv-pay').textContent=r.firstPay>0?fmt(r.firstPay)+' ₽':'—';
+  document.getElementById('sv-paysub').textContent=r.mortOn?'начало ипотеки':'нет ипотеки';
+  document.getElementById('sv-over').textContent=fmt(r.overpay)+' ₽';
+  document.getElementById('sv-oversub').textContent=`проценты: ${fmt(r.totInt)} ₽`;
+  // mort-amt-box removed — skip
+}
+
+function renderInstBar(r){
+  const bar=document.getElementById('inst-bar');
+  if(!r||!r.instOn){bar.style.display='none';return;}
+  bar.style.display='flex';
+  const mo=Math.round(pn(document.getElementById('inst-mo').value));
+  const basePay=r.price*getBaseRate()/100;
+  let specPayStr='—';
+  if(specRules.length>0&&specRules[0].months){
+    const sAmt=r.price*pn(specRules[0].rate)/100;
+    specPayStr=`${fmt(sAmt)} ₽ (мес. ${specRules[0].months})`;
+  }
+  document.getElementById('ib-mo').textContent=mo+' мес';
+  document.getElementById('ib-base').textContent=fmt(basePay)+' ₽/мес';
+  document.getElementById('ib-spec').textContent=specPayStr;
+  document.getElementById('ib-total').textContent=fmt(r.instTotal)+' ₽';
+  document.getElementById('ib-rest').textContent=fmt(r.mortBal)+' ₽';
+}
+
+// ═══════════ CHART — DUAL Y-AXIS ═══════════
+function renderChart(r){
+  if(payC){payC.destroy();payC=null;}
+  if(balC){balC.destroy();balC=null;}
+  if(!r||!r.sch.length)return;
+
+  const instRows=r.sch.filter(x=>x.phase==='inst');
+  const mortRows=r.sch.filter(x=>x.phase==='mort');
+  // Show ALL months - no sampling
+  const data=[...instRows,...mortRows];
+
+  const labels=data.map(d=>d.month);
+  const instD=data.map(d=>d.phase==='inst'?d.pay:0);
+  const mortPri=data.map(d=>d.phase==='mort'?d.pri:0);
+  const mortInt=data.map(d=>d.phase==='mort'?d.int:0);
+  const insD=data.map(d=>d.ins||0);
+  const balD=data.map(d=>d.bal);
+
+  const instCount=instRows.length;
+  // Dual axis removed — single scale with broken-bar for outliers
+  document.getElementById('dual-axis-note').style.display='none';
+
+  // ── Broken bar: detect outlier installment payments ──
+  const allTotals=data.map((_,i)=>(instD[i]||0)+(mortPri[i]||0)+(mortInt[i]||0)+(insD[i]||0));
+  const mortTotals=mortRows.map(d=>d.pay+(d.ins||0)).filter(v=>v>0);
+  const maxMortTot=mortTotals.length?Math.max(...mortTotals):0;
+  const maxAllTot=Math.max(...allTotals,0);
+  const needsCap=maxMortTot>0&&maxAllTot>maxMortTot*2.5;
+  const yCapVal=needsCap?maxMortTot*1.6:undefined;
+  const brokenItems=[];
+  if(needsCap&&yCapVal){
+    data.forEach((_,i)=>{if(allTotals[i]>yCapVal)brokenItems.push({barIdx:i,trueVal:allTotals[i]});});
+  }
+
+  const regions=[];
+  if(instCount>0) regions.push({from:0,to:instCount-1,bg:'rgba(184,134,42,0.11)',label:'Рассрочка',lc:'rgba(130,80,0,0.55)'});
+  if(instCount<data.length) regions.push({from:instCount,to:data.length-1,bg:'rgba(26,54,93,0.04)',label:'Ипотека',lc:'rgba(26,54,93,0.35)'});
+
+  // Single Y-axis with optional capped max for broken-bar effect
+  const scales={
+    x:{stacked:true,ticks:{maxTicksLimit:14,font:{size:10},color:'#9AAABB'},grid:{display:false}},
+    y:{stacked:true,max:yCapVal,ticks:{callback:v=>fmt(v),maxTicksLimit:6,font:{size:11},color:'#9AAABB'},grid:{color:'#EEF1F8'}}
+  };
+
+  // ── Dynamic legend ──
+  {
+    const legendEl = document.getElementById('chart-legend');
+    if(legendEl){
+      const items = [
+        {show: instD.some(v=>v>0),      color:'#B8862A',    label:'Рассрочка'},
+        {show: mortPri.some(v=>v>0),    color:'var(--blue)', label:'Тело ипотеки'},
+        {show: mortInt.some(v=>v>0),    color:'var(--navy)', label:'Проценты'},
+        {show: insD.some(v=>v>0),       color:'var(--orange)',label:'Страховка'},
+      ];
+      legendEl.innerHTML = items
+        .filter(i=>i.show)
+        .map(i=>`<span style="color:${i.color}">■ ${i.label}</span>`)
+        .join('');
+    }
+  }
+  payC=new Chart(document.getElementById('pay-chart').getContext('2d'),{
+    type:'bar',
+    data:{labels,datasets:[
+      {label:'Рассрочка',   data:instD,  backgroundColor:'rgba(184,134,42,0.85)',stack:'s'},
+      {label:'Тело ипотеки',data:mortPri,backgroundColor:'#2E6FBF',stack:'s'},
+      {label:'Проценты',    data:mortInt,backgroundColor:'#1A365D',stack:'s'},
+      {label:'Страховка',   data:insD,   backgroundColor:'#C86A00',stack:'s'},
+    ]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        bgRegion:{regions},
+        legend:{display:false},
+        tooltip:{callbacks:{title:i=>`Месяц ${i[0].label}`,label:i=>`${i.dataset.label}: ${fmt(i.raw)} ₽`}},
+        title:{display:true,text:'Ежемесячные платежи',font:{size:13,weight:'700'},color:'#1A2535',padding:{bottom:8}},
+        datalabels:{
+          display:'auto',
+          anchor:'end',
+          align:'end',
+          rotation:-90,
+          font:{size:9,weight:'600'},
+          color:'#566480',
+          formatter:(v,ctx)=>{
+            if(v<=0)return null;
+            const total=ctx.chart.data.datasets.reduce((s,ds)=>s+(ds.data[ctx.dataIndex]||0),0);
+            const isLast=ctx.datasetIndex===ctx.chart.data.datasets.length-1||
+              ctx.chart.data.datasets.slice(ctx.datasetIndex+1).every(ds=>(ds.data[ctx.dataIndex]||0)===0);
+            // Skip outlier bars (they have brokenBar label instead)
+            const isOutlier=brokenItems.some(b=>b.barIdx===ctx.dataIndex);
+            return isLast&&total>0&&!isOutlier?fmt(total):null;
+          }
+        },
+        brokenBar:{items:brokenItems,fmt:v=>fmt(v)+' ₽'}
+      },
+      scales
+    }
+  });
+
+  balC=new Chart(document.getElementById('bal-chart').getContext('2d'),{
+    type:'line',
+    data:{labels,datasets:[{
+      label:'Остаток',data:balD,
+      borderColor:'#1A365D',backgroundColor:'rgba(26,54,93,.08)',
+      fill:true,tension:.3,pointRadius:0,pointHoverRadius:4,borderWidth:2
+    }]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        bgRegion:{regions},
+        legend:{display:false},
+        tooltip:{callbacks:{title:i=>`Месяц ${i[0].label}`,label:i=>`Остаток: ${fmt(i.raw)} ₽`}},
+        title:{display:true,text:'Остаток долга',font:{size:13,weight:'700'},color:'#1A2535',padding:{bottom:8}}
+      },
+      scales:{
+        x:{ticks:{maxTicksLimit:12,font:{size:11},color:'#9AAABB'},grid:{display:false}},
+        y:{ticks:{callback:v=>fmt(v),maxTicksLimit:6,font:{size:11},color:'#9AAABB'},grid:{color:'#EEF1F8'}}
+      }
+    }
+  });
+}
+
+// ═══════════ SCHEDULE TABLE ═══════════
+function setSF(f){schFlt=f;schPage=1;renderSched(CR);}
+function renderSched(r){
+  const tb=document.getElementById('sched-body');
+  const pg=document.getElementById('pager');
+  const ft=document.getElementById('sched-foot');
+  if(!r||!r.sch.length){
+    tb.innerHTML='<tr><td colspan="7" class="empty" style="padding:30px;text-align:center">Введите данные</td></tr>';
+    pg.innerHTML='';ft.style.display='none';return;
+  }
+  let rows=r.sch;
+  if(schFlt==='i') rows=rows.filter(x=>x.phase==='inst');
+  if(schFlt==='m') rows=rows.filter(x=>x.phase==='mort');
+  document.getElementById('sched-cnt').textContent=rows.length+' строк';
+  const pages=Math.ceil(rows.length/PAGE);
+  if(schPage>pages)schPage=1;
+  const sl=rows.slice((schPage-1)*PAGE,schPage*PAGE);
+  tb.innerHTML=sl.map(d=>`<tr ${d.isEarly?'style="background:#E6F5EF"':''}>
+    <td>${d.month}</td>
+    <td><span class="bdg ${d.phase==='inst'?'bi':'bm'}">${d.phase==='inst'?'Рассрочка':d.isEarly?'⚡Досрочно':'Ипотека'+(d.rate?' '+fmtd(d.rate,1)+'%':'')}</span></td>
+    <td><strong>${fmt(d.pay)} ₽</strong></td>
+    <td>${fmt(d.pri)} ₽</td>
+    <td>${d.int>0?fmt(d.int)+' ₽':'—'}</td>
+    <td>${d.ins>0?fmt(d.ins)+' ₽':'—'}</td>
+    <td>${fmt(d.bal)} ₽</td>
+  </tr>`).join('');
+  const tp=rows.reduce((s,x)=>s+x.pay,0),tpr=rows.reduce((s,x)=>s+x.pri,0);
+  const ti=rows.reduce((s,x)=>s+x.int,0),tins=rows.reduce((s,x)=>s+(x.ins||0),0);
+  ft.style.display='';
+  document.getElementById('ft-pay').textContent=fmt(tp)+' ₽';
+  document.getElementById('ft-pri').textContent=fmt(tpr)+' ₽';
+  document.getElementById('ft-int').textContent=ti>0?fmt(ti)+' ₽':'—';
+  document.getElementById('ft-ins').textContent=tins>0?fmt(tins)+' ₽':'—';
+  if(pages<=1){pg.innerHTML='';return;}
+  let h=`<button class="pgb" onclick="goPage(${schPage-1})" ${schPage===1?'disabled':''}>←</button>`;
+  for(let p=1;p<=pages;p++){
+    if(p===1||p===pages||Math.abs(p-schPage)<=2)
+      h+=`<button class="pgb ${p===schPage?'on':''}" onclick="goPage(${p})">${p}</button>`;
+    else if(Math.abs(p-schPage)===3) h+='<span style="color:var(--tx3)">…</span>';
+  }
+  h+=`<button class="pgb" onclick="goPage(${schPage+1})" ${schPage===pages?'disabled':''}>→</button>`;
+  pg.innerHTML=h;
+}
+function goPage(p){schPage=p;renderSched(CR);}
+
+// ═══════════ ANALYTICS ═══════════
+function renderAnalytics(r){
+  const c=document.getElementById('an-content');
+  if(!r){c.innerHTML='<div class="empty"><div class="empty-ico">📈</div><div class="empty-ttl">Введите данные</div></div>';return;}
+  const area=pn(document.getElementById('r-area').value);
+  const zhk=document.getElementById('r-zhk').value||'';
+  const dpPct=r.price>0?r.dp/r.price*100:0;
+  const ipct=r.price>0?r.instTotal/r.price*100:0;
+  const mpct=r.price>0?r.mortBal/r.price*100:0;
+  const intPct=r.price>0?r.totInt/r.price*100:0;
+  const insPct=r.price>0?r.totIns/r.price*100:0;
+  const opct=r.price>0?r.overpay/r.price*100:0;
+  const sqmPrice=area>0?r.price/area:0;
+  const sqmTotal=area>0?r.totPay/area:0;
+  const years=r.sch.length/12;
+  // Effective rate: overpay/principal/years
+  const principal=r.mortBal||0;
+  const effRate=principal>0&&r.totInt>0?((r.totInt/principal)/years*100):0;
+  // Income needed (payment = 40% of income)
+  const monthlyPay=r.firstPay||0;
+  const incomeNeeded=monthlyPay>0?monthlyPay/0.4:0;
+  // Appreciation: assume 7%/year
+  const apprRate=0.07;
+  const apprVal=r.price*Math.pow(1+apprRate,years);
+  const apprGain=apprVal-r.totPay;
+  // Tax deduction estimate
+  const ndflEst=0.13;
+  const propVyc=Math.min(r.price,2000000)*ndflEst;
+  const intVyc=Math.min(r.totInt,3000000)*ndflEst;
+  const totalVyc=propVyc+intVyc;
+
+  const bars=[
+    {l:'Первонач. взнос',   pct:dpPct,  clr:'#1E8A5E', v:fmt(r.dp)+' ₽'},
+    {l:'Рассрочка (тело)',  pct:ipct,   clr:'#B8862A', v:fmt(r.instTotal)+' ₽'},
+    {l:'Ипотека (тело)',    pct:mpct,   clr:'#2E6FBF', v:fmt(r.mortBal)+' ₽'},
+    {l:'Проценты ипотеки', pct:intPct, clr:'#1A365D', v:fmt(r.totInt)+' ₽'},
+    {l:'Страховка',         pct:insPct, clr:'#C86A00', v:fmt(r.totIns)+' ₽'},
+    {l:'Отделка',           pct:r.price>0?r.finishing/r.price*100:0, clr:'#6D28C0', v:fmt(r.finishing)+' ₽'},
+  ].filter(b=>b.pct>0.01);
+
+  c.innerHTML=`
+  <div>
+    <div class="secttl">Структура выплат</div>
+    ${bars.map(b=>`
+      <div class="brow">
+        <div class="blbl">${b.l}</div>
+        <div class="btrk"><div class="bfil" style="width:${Math.min(100,b.pct)}%;background:${b.clr}"></div></div>
+        <div class="bval" style="color:${b.clr}">${fmtd(b.pct,1)}%</div>
+      </div>
+      <div style="font-size:11px;color:var(--tx2);padding:0 0 5px 147px">${b.v}</div>
+    `).join('')}
+    ${r.price>0&&r.overpay>0?`<div style="margin-top:9px" class="alert a-warn">
+      💡 Переплата <strong>${fmt(r.overpay)} ₽</strong> (${fmtd(opct,1)}% от цены) за <strong>${fmtd(years,1)} лет</strong>
+    </div>`:''}
+  </div>
+  <div>
+    <div class="secttl">Ключевые показатели</div>
+    <div class="kpis">
+      <div class="kpi"><div class="kpi-l">Итоговая выплата</div><div class="kpi-v">${fmt(r.totPay)} ₽</div><div class="kpi-s">всё включено</div></div>
+      <div class="kpi"><div class="kpi-l">Переплата</div><div class="kpi-v" style="color:var(--red)">${fmt(r.overpay)} ₽</div><div class="kpi-s">${fmtd(opct,1)}% от цены</div></div>
+      <div class="kpi"><div class="kpi-l">Срок выплат</div><div class="kpi-v">${r.sch.length} мес</div><div class="kpi-s">${fmtd(years,1)} лет</div></div>
+      <div class="kpi"><div class="kpi-l">Платёж/мес</div><div class="kpi-v">${monthlyPay?fmt(monthlyPay)+' ₽':'—'}</div><div class="kpi-s">начало ипотеки</div></div>
+      <div class="kpi"><div class="kpi-l">Цена м²</div><div class="kpi-v">${sqmPrice?fmt(Math.round(sqmPrice))+' ₽':'—'}</div><div class="kpi-s">базовая цена</div></div>
+      <div class="kpi"><div class="kpi-l">Итого за м²</div><div class="kpi-v" style="color:var(--navy)">${sqmTotal?fmt(Math.round(sqmTotal))+' ₽':'—'}</div><div class="kpi-s">с ипотекой и расходами</div></div>
+      ${effRate>0?`<div class="kpi"><div class="kpi-l">Эффект. ставка</div><div class="kpi-v" style="color:var(--red)">${fmtd(effRate,1)}%</div><div class="kpi-s">годовых (с учётом страховки)</div></div>`:''}
+      ${incomeNeeded>0?`<div class="kpi"><div class="kpi-l">Нужный доход</div><div class="kpi-v">${fmt(Math.round(incomeNeeded))} ₽</div><div class="kpi-s">при нагрузке 40% дохода</div></div>`:''}
+      ${totalVyc>0?`<div class="kpi" style="background:var(--green2)"><div class="kpi-l">Вычет (оценка)</div><div class="kpi-v" style="color:var(--green)">+${fmt(Math.round(totalVyc))} ₽</div><div class="kpi-s">имущ. + ипотечный, 13%</div></div>`:''}
+      ${apprGain>0?`<div class="kpi" style="background:#f0f4ff"><div class="kpi-l">Прирост стоимости</div><div class="kpi-v" style="color:var(--blue)">+${fmt(Math.round(apprGain))} ₽</div><div class="kpi-s">прогноз +7%/год за ${fmtd(years,0)} лет</div></div>`:''}
+    </div>
+  </div>
+  <div style="grid-column:1/-1">
+    <div class="secttl">Аргументы для принятия решения</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      ${totalVyc>0?`<div class="alert a-ok" style="font-size:13px">
+        💰 <strong>Налоговый вычет:</strong> государство вернёт вам до <strong>${fmt(Math.round(totalVyc))} ₽</strong> — реальные деньги на руки (имущественный + по процентам, ставка 13%).
+      </div>`:''}
+      ${apprGain>0?`<div class="alert a-info" style="font-size:13px">
+        📈 <strong>Рост стоимости:</strong> при средней динамике +7%/год квартира через ${fmtd(years,0)} лет будет стоить <strong>${fmt(Math.round(apprVal))} ₽</strong> — дороже ваших суммарных выплат на <strong>${fmt(Math.round(apprGain))} ₽</strong>.
+      </div>`:''}
+      ${monthlyPay>0?`<div class="alert a-warn" style="font-size:13px">
+        🏦 <strong>Ипотека vs аренда:</strong> ежемесячный платёж <strong>${fmt(Math.round(monthlyPay))} ₽</strong> — это не расходы, а инвестиция. Аренда аналогичной квартиры через 10 лет будет в 1,5–2 раза дороже, а квартира останется у вас.
+      </div>`:''}
+      <div class="alert" style="background:#f8faff;border:1px solid var(--border);font-size:13px">
+        🔑 <strong>Сейчас — лучший момент:</strong> фиксируете цену сегодня. При инфляции 8–10%/год цены на жильё растут: через 3 года та же квартира будет стоить ${fmt(Math.round(r.price*1.26))} ₽.
+      </div>
+    </div>
+    ${SVs.length>=2?'<div class="secttl" style="margin-top:20px">Сравнение вариантов</div>'+miniCmp():''}
+  </div>`;
+}
+
+function miniCmp(){
+  if(SVs.length<2)return'';
+  const mi=key=>Math.min(...SVs.map(v=>v.R[key]||0));
+  const ma=key=>Math.max(...SVs.map(v=>v.R[key]||0));
+  const sqm=v=>{ const a=v.P&&v.P.area?v.P.area:0; return a>0?Math.round(v.R.totPay/a):0; };
+  return `<div style="overflow-x:auto"><table class="cmpt" style="font-size:12px">
+    <thead><tr><th>Вариант</th><th>Цена</th><th>Итого</th><th>Переплата</th><th>Платёж/мес</th><th>Срок, лет</th></tr></thead>
+    <tbody>${SVs.map(v=>`<tr>
+      <td>${v.name}${v.ref&&v.ref.area?'<br><span style="font-size:10px;color:var(--tx2)">'+v.ref.area+' м²</span>':''}</td>
+      <td>${fmt(v.R.price)} ₽</td>
+      <td class="${v.R.totPay===mi('totPay')?'best':''}">${fmt(v.R.totPay)} ₽</td>
+      <td class="${v.R.overpay===mi('overpay')?'best':''}" style="${v.R.overpay===ma('overpay')?'color:var(--red)':''}">${fmt(v.R.overpay)} ₽</td>
+      <td>${v.R.firstPay?fmt(v.R.firstPay)+' ₽':'—'}</td>
+      <td class="${v.R.totalMo===mi('totalMo')?'best':''}">${v.R.totalMo?fmtd(v.R.totalMo/12,1):'—'}</td>
+    </tr>`).join('')}</tbody>
+  </table></div><div style="font-size:11px;color:var(--green);margin-top:6px">🟢 Лучшее значение выделено</div>`;
+}
+
+
+// ═══════════ RENT VS BUY ═══════════
+function calcRVBSafe(){
+  // Protect focus: if a rent input is focused, defer the rebuild
+  const f=document.activeElement;
+  const rmo=document.getElementById('rent-mo');
+  const ridx=document.getElementById('rent-idx');
+  if(f===rmo||f===ridx){
+    clearTimeout(calcRVBSafe._t);
+    calcRVBSafe._t=setTimeout(calcRVB,400);
+  } else {
+    calcRVB();
+  }
+}
+function calcRVB(){
+  const el=document.getElementById('rvb-result');
+  const rent=pn(document.getElementById('rent-mo').value);
+  const idx=(pn(document.getElementById('rent-idx').value)||5)/100;
+  if(!CR||!rent)return;
+  const months=CR.sch.length;
+  const years=months/12;
+  let rentIndexed=0,rm=rent;
+  for(let y=0;y<Math.ceil(years);y++){rentIndexed+=rm*Math.min(12,months-y*12);rm*=1+idx;}
+  const buyTotal=CR.totPay;
+  const diff=buyTotal-rentIndexed;
+  el.innerHTML=`
+  <div class="rvb-grid">
+    <div class="rvb-card buy">
+      <div class="rvb-title" style="color:var(--navy)">🏠 Покупка + ипотека</div>
+      <div class="rvb-row"><span>Первоначальный взнос</span><span>${fmt(CR.dp)} ₽</span></div>
+      <div class="rvb-row"><span>Платежи по ипотеке/рассрочке</span><span>${fmt(CR.sch.reduce((s,r)=>s+r.pay,0))} ₽</span></div>
+      <div class="rvb-row"><span>Доп. расходы</span><span>${fmt(CR.totIns+CR.oneoff+CR.finishing)} ₽</span></div>
+      <div class="rvb-row"><span>Итого за ${fmtd(years,1)} лет</span><span>${fmt(buyTotal)} ₽</span></div>
+      <div style="margin-top:9px;font-size:12px;color:var(--navy)">✅ В итоге <strong>своя квартира</strong></div>
+    </div>
+    <div class="rvb-card rent">
+      <div class="rvb-title" style="color:var(--orange)">🏢 Аренда</div>
+      <div class="rvb-row"><span>Аренда ${fmt(rent)} ₽/мес</span><span>${fmt(rent*months)} ₽</span></div>
+      <div class="rvb-row"><span>Индексация +${fmtd(idx*100,0)}%/год</span><span>+${fmt(rentIndexed-rent*months)} ₽</span></div>
+      <div class="rvb-row"><span>Итого за ${fmtd(years,1)} лет</span><span>${fmt(rentIndexed)} ₽</span></div>
+      <div style="margin-top:9px;font-size:12px;color:var(--orange)">❌ В итоге <strong>нет имущества</strong></div>
+    </div>
+  </div>
+  <div style="margin-top:15px" class="alert ${diff>0?'a-warn':'a-green'}">
+    ${diff>0
+      ?`💡 Покупка обойдётся дороже на <strong>${fmt(diff)} ₽</strong>, но вы получаете квартиру стоимостью ~${fmt(CR.price)} ₽.`
+      :`💡 Покупка выгоднее аренды на <strong>${fmt(-diff)} ₽</strong> за ${fmtd(years,1)} лет — и квартира ваша!`
+    }
+  </div>`;
+}
+
+// ═══════════ PRE-APPROVAL ═══════════
+function calcPA(){ /* pa elements removed */ }
+
+// ═══════════ TABS ═══════════
+function setTab(name){
+  ['chart','sched','vars','an','rvb','tax'].forEach(t=>{
+    document.getElementById('t-'+t).style.display=t===name?'':'none';
+  });
+  document.querySelectorAll('.tab').forEach(el=>el.classList.toggle('on',el.dataset.t===name));
+  if(name==='vars')renderVarList();
+  if(name==='an')renderAnalytics(CR);
+  if(name==='rvb')calcRVB();
+  if(name==='tax')calcTax();
+}
+
+// ═══════════ VARIANTS ═══════════
+
+// Build human-readable mortgage rate description from rateRows + mortTerm
+function mortRateDesc(P){
+  if(!P.mortOn) return '';
+  const rows=P.rateRows||[{from:1,rate:'8.5'}];
+  const totalMo=parseInt(P.mortTerm)||240;
+  if(rows.length===1) return totalMo+' мес '+rows[0].rate+'%';
+  const parts=rows.map((r,i)=>{
+    const nextFrom=rows[i+1]?parseInt(rows[i+1].from):totalMo+1;
+    const mos=nextFrom-parseInt(r.from);
+    return mos+' мес '+r.rate+'%';
+  });
+  return parts.join(', остаток ');
+}
+
+// Summarize payment schedule: groups consecutive same-rounded payments, merges identical amounts
+// Returns e.g. "207 000 ₽: 1–120 мес" or "5 000 ₽: 1–12, 25–36 мес / 10 000 ₽: 13–24 мес"
+function summarizePayments(sch){
+  if(!sch||!sch.length) return '—';
+  const R=v=>Math.round(v/1000)*1000; // round to nearest 1000
+
+  // Build consecutive runs
+  const runs=[];
+  let curPay=R(sch[0].pay), start=sch[0].month;
+  for(let i=1;i<sch.length;i++){
+    const p=R(sch[i].pay);
+    if(p!==curPay){
+      runs.push({pay:curPay, from:start, to:sch[i-1].month});
+      curPay=p; start=sch[i].month;
+    }
+  }
+  runs.push({pay:curPay, from:start, to:sch[sch.length-1].month});
+
+  if(runs.length===1) return fmt(runs[0].pay)+' ₽';
+
+  // Group runs by same payment amount → merge their spans
+  const byPay=new Map();
+  runs.forEach(r=>{
+    if(!byPay.has(r.pay)) byPay.set(r.pay,[]);
+    byPay.get(r.pay).push(r.from===r.to?r.from+'':r.from+'–'+r.to);
+  });
+
+  return [...byPay].map(([pay,spans])=>fmt(pay)+' ₽: '+spans.join(', ')+' мес').join('<br>');
+}
+
+// Summarize only installment-phase payments
+function summarizeInstPayments(sch){
+  if(!sch||!sch.length) return null;
+  const inst=sch.filter(r=>r.phase==='inst');
+  if(!inst.length) return null;
+  return summarizePayments(inst);
+}
+
+function showSaveModal(){
+  if(!CR){alert('Сначала заполните данные');return;}
+  const zhk=document.getElementById('r-zhk').value;
+  const area=document.getElementById('r-area').value;
+  let def=zhk||(area?'Вариант':'Вариант '+(SVs.length+1));
+  if(zhk&&area) def=zhk+', '+area+' м²';
+  document.getElementById('vname-inp').value=def;
+
+  // Build save-mode selector if there are existing variants
+  const wrap=document.getElementById('save-mode-wrap');
+  const nameWrap=document.getElementById('save-name-wrap');
+  if(SVs.length>0){
+    wrap.innerHTML=`
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
+          <input type="radio" name="save-mode" value="new" checked onchange="onSaveModeChange()">
+          <span>Сохранить как <strong>новый вариант</strong></span>
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
+          <input type="radio" name="save-mode" value="overwrite" onchange="onSaveModeChange()">
+          <span>Перезаписать существующий:</span>
+        </label>
+        <select id="overwrite-sel" style="display:none;margin-left:24px;font-size:13px;padding:6px 10px;border:1.5px solid var(--border);border-radius:8px">
+          ${SVs.map((v,i)=>`<option value="${i}">${v.name}</option>`).join('')}
+        </select>
+      </div>`;
+    nameWrap.style.display='';
+  } else {
+    wrap.innerHTML='';
+    nameWrap.style.display='';
+  }
+
+  openModal('modal-save');
+  setTimeout(()=>document.getElementById('vname-inp').focus(),80);
+}
+
+function onSaveModeChange(){
+  const mode=document.querySelector('input[name="save-mode"]:checked')?.value;
+  const sel=document.getElementById('overwrite-sel');
+  const nameWrap=document.getElementById('save-name-wrap');
+  if(mode==='overwrite'){
+    if(sel) sel.style.display='';
+    nameWrap.style.display='none';
+  } else {
+    if(sel) sel.style.display='none';
+    nameWrap.style.display='';
+  }
+}
+
+function buildVariantData(name){
+  return {
+    id:Date.now(),name,
+    at:new Date().toLocaleString('ru-RU'),
+    ref:{zhk:document.getElementById('r-zhk').value,area:document.getElementById('r-area').value,note:document.getElementById('r-note').value},
+    P:{
+      price:CR.price,dp:CR.dp,dpMode,dpPct:CR.dpPct,
+      matCap:pn(document.getElementById('matcap').value),
+      finishing:CR.finishing,oneoff:CR.oneoff,
+      instOn:CR.instOn,instMo:document.getElementById('inst-mo').value,
+      specRules:JSON.parse(JSON.stringify(specRules)),
+      baseRate:document.getElementById('base-rate-inp')?.value||'0.05',
+      mortOn:CR.mortOn,mortTerm:document.getElementById('mort-mo').value,
+      rateRows:JSON.parse(JSON.stringify(rateRows)),payType,
+      insur:document.getElementById('insur').value,
+      earlyPayments:JSON.parse(JSON.stringify(earlyPayments)),
+      floorPlan:floorPlanB64
+    },
+    R:{price:CR.price,dp:CR.dp,dpPct:CR.dpPct,
+       totPay:CR.totPay,totInt:CR.totInt,totIns:CR.totIns,
+       overpay:CR.overpay,firstPay:CR.firstPay,
+       instTotal:CR.instTotal,mortBal:CR.mortBal,
+       totalMo:CR.sch.length,finishing:CR.finishing,oneoff:CR.oneoff,
+       sch:CR.sch.slice(0,400)}
+  };
+}
+
+function doSave(){
+  if(!CR){alert('Сначала заполните данные');return;}
+  const modeEl=document.querySelector('input[name="save-mode"]:checked');
+  const mode=modeEl?modeEl.value:'new';
+
+  if(mode==='overwrite'){
+    const selEl=document.getElementById('overwrite-sel');
+    const idx=selEl?parseInt(selEl.value):0;
+    if(idx>=0&&idx<SVs.length){
+      const oldName=SVs[idx].name;
+      SVs[idx]=buildVariantData(oldName);
+      SVs[idx].at=new Date().toLocaleString('ru-RU');
+    }
+  } else {
+    const name=document.getElementById('vname-inp').value.trim()||'Вариант '+(SVs.length+1);
+    SVs.push(buildVariantData(name));
+  }
+  saveLS();closeModal('modal-save');setTab('vars');
+}
+
+function loadVar(i){
+  const v=SVs[i],P=v.P;
+  document.getElementById('r-zhk').value=v.ref.zhk||'';
+  document.getElementById('r-area').value=v.ref.area||'';
+  document.getElementById('r-note').value=v.ref.note||'';
+  document.getElementById('price').value=fmt(P.price);
+  dpMode=P.dpMode||'a';
+  document.getElementById(dpMode==='a'?'dp-a':'dp-p').checked=true;
+  document.getElementById('dp-aw').style.display=dpMode==='a'?'':'none';
+  document.getElementById('dp-pw').style.display=dpMode==='p'?'':'none';
+  if(dpMode==='a') document.getElementById('dp-amt').value=fmt(P.dp-(P.matCap||0));
+  else document.getElementById('dp-pct').value=fmtd(P.dpPct,1);
+  document.getElementById('matcap').value=P.matCap?fmt(P.matCap):'';
+  document.getElementById('finishing').value=P.finishing?fmt(P.finishing):'';
+  document.getElementById('oneoff').value=P.oneoff?fmt(P.oneoff):'';
+  document.getElementById('inst-on').checked=!!P.instOn;
+  document.getElementById('inst-fields').style.display=P.instOn?'flex':'none';
+  document.getElementById('inst-tag').style.display=P.instOn?'':'none';
+  document.getElementById('inst-mo').value=P.instMo||'23';
+  document.getElementById('inst-yr').value=fmtd((P.instMo||23)/12,1);
+  specRules=JSON.parse(JSON.stringify(P.specRules||[]));
+  document.getElementById('mort-on').checked=!!P.mortOn;
+  document.getElementById('mort-fields').style.display=P.mortOn?'flex':'none';
+  document.getElementById('mort-tag').style.display=P.mortOn?'':'none';
+  document.getElementById('mort-mo').value=P.mortTerm||'240';
+  document.getElementById('mort-yr').value=fmtd((P.mortTerm||240)/12,1);
+  rateRows=JSON.parse(JSON.stringify(P.rateRows||[{from:1,rate:'8.5'}]));
+  payType=P.payType||'ann';
+  document.getElementById(payType==='ann'?'pt-ann':'pt-dif').checked=true;
+  document.getElementById('insur').value=P.insur||'';
+  earlyPayments=JSON.parse(JSON.stringify(P.earlyPayments||[]));
+  // Restore floor plan
+  if(P.floorPlan){
+    floorPlanB64=P.floorPlan;
+    document.getElementById('fp-preview').src=P.floorPlan;
+    document.getElementById('fp-preview-wrap').style.display='';
+  } else {
+    floorPlanB64='';
+    document.getElementById('fp-preview-wrap').style.display='none';
+    document.getElementById('fp-file').value='';
+  }
+  renderRateRows();renderRules();renderEP();recalc();
+  closeModal('modal-vdet');
+  setTab('chart');
+}
+
+function showVarDetail(i){
+  const v=SVs[i],R=v.R,P=v.P;
+  const area=v.ref.area?pn(v.ref.area):0;
+  document.getElementById('vdet-content').innerHTML=`
+    <div class="modal-ttl">${v.name}</div>
+    <div class="modal-sub">${v.ref.zhk||''}${v.ref.area?' · '+v.ref.area+' м²':''} · ${v.at}</div>
+    <div class="kpis" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:14px">
+      <div class="kpi"><div class="kpi-l">Цена квартиры</div><div class="kpi-v">${fmt(R.price)} ₽</div></div>
+      <div class="kpi"><div class="kpi-l">Первонач. взнос</div><div class="kpi-v">${fmt(R.dp)} ₽</div><div class="kpi-s">${fmtd(R.dpPct,1)}%</div></div>
+      <div class="kpi"><div class="kpi-l">Итого выплата</div><div class="kpi-v" style="color:var(--navy)">${fmt(R.totPay)} ₽</div></div>
+      <div class="kpi"><div class="kpi-l">Переплата</div><div class="kpi-v" style="color:var(--red)">${fmt(R.overpay)} ₽</div></div>
+      <div class="kpi"><div class="kpi-l">Проценты</div><div class="kpi-v">${fmt(R.totInt)} ₽</div></div>
+      <div class="kpi"><div class="kpi-l">Платёж/мес</div><div class="kpi-v">${R.firstPay?fmt(R.firstPay)+' ₽':'—'}</div></div>
+      ${P.instOn?`<div class="kpi"><div class="kpi-l">Рассрочка</div><div class="kpi-v">${fmt(R.instTotal)} ₽</div><div class="kpi-s">${P.instMo} мес</div></div>`:''}
+      ${area?`<div class="kpi"><div class="kpi-l">Цена м² (база)</div><div class="kpi-v">${fmt(R.price/area)} ₽</div></div>`:''}
+      ${area?`<div class="kpi"><div class="kpi-l">Итого за м²</div><div class="kpi-v">${fmt(R.totPay/area)} ₽</div></div>`:''}
+      <div class="kpi"><div class="kpi-l">Срок</div><div class="kpi-v">${R.totalMo} мес</div><div class="kpi-s">${fmtd(R.totalMo/12,1)} лет</div></div>
+    </div>
+    ${v.ref.note?`<div class="alert a-info" style="font-size:12px;margin-bottom:10px">📝 ${v.ref.note}</div>`:''}
+    <div style="font-size:12px;color:var(--tx2)">
+      Ставка: ${P.rateRows?.[0]?.rate||'—'}%
+      ${P.rateRows?.length>1?' (с изменениями)':''}
+      · Тип: ${P.payType==='ann'?'Аннуитет':'Дифференцированный'}
+    </div>`;
+  document.getElementById('vdet-load-btn').onclick=()=>loadVar(i);
+  openModal('modal-vdet');
+}
+
+function delVar(i){
+  if(!confirm(`Удалить «${SVs[i].name}»?`))return;
+  SVs.splice(i,1);saveLS();renderVarList();renderAnalytics(CR);
+}
+
+function renderVarList(){
+  const c=document.getElementById('vlist');
+  if(!SVs.length){
+    c.innerHTML='<div class="empty"><div class="empty-ico">💾</div><div class="empty-ttl">Нет сохранённых вариантов</div><div style="font-size:13px;color:var(--tx2)">Заполните данные и нажмите «Сохранить вариант»</div></div>';
+    document.getElementById('cmp-wrap').style.display='none';return;
+  }
+  c.innerHTML='<div class="vlist">'+SVs.map((v,i)=>`
+    <div class="vi">
+      <div class="vi-info" style="cursor:pointer" onclick="showVarDetail(${i})">
+        <div class="vi-name">${v.name}</div>
+        <div class="vi-meta">
+          ${v.ref.zhk?v.ref.zhk+' · ':''}${v.ref.area?v.ref.area+' м² · ':''}
+          Цена: ${fmt(v.R.price)} ₽ · Итого: ${fmt(v.R.totPay)} ₽ · Переплата: ${fmt(v.R.overpay)} ₽
+        </div>
+        <div class="vi-meta">
+          ПВ: ${fmt(v.R.dp)} ₽ (${fmtd(v.R.dpPct,1)}%)
+          ${v.P.instOn?' · Рассрочка: '+v.P.instMo+' мес':''}
+          ${v.P.mortOn?' · Ипотека: '+mortRateDesc(v.P):''}
+          · ${v.at}
+        </div>
+      </div>
+      <div class="vi-acts">
+        <button class="btn btn-navy btn-xs" onclick="exportPdfVariant(${i})" title="Скачать КП">📄 PDF</button>
+        <button class="btn btn-ghost btn-sm" onclick="showVarDetail(${i})">🔍 Детали</button>
+        <button class="btn btn-navy btn-sm" onclick="loadVar(${i})">↑ Загрузить</button>
+        <button class="btn btn-red btn-sm" onclick="delVar(${i})">×</button>
+      </div>
+    </div>`).join('')+'</div>';
+  if(SVs.length>=2){document.getElementById('cmp-wrap').style.display='';renderCmpTable();}
+  else document.getElementById('cmp-wrap').style.display='none';
+  renderVarCharts();
+}
+
+// Variant comparison colors palette
+const VC_COLORS=['#1A365D','#B8862A','#1E8A5E','#C94040','#6D28C0','#C86A00','#0891B2','#65A30D'];
+
+function renderVarCharts(){
+  if(vcPayC){vcPayC.destroy();vcPayC=null;}
+  if(vcBalC){vcBalC.destroy();vcBalC=null;}
+  const vc=document.getElementById('vc-wrap');
+  if(SVs.length<1){vc.style.display='none';return;}
+  vc.style.display='';
+
+  // Build per-variant sampled series
+  const payDs=[], balDs=[];
+  SVs.forEach((v,i)=>{
+    const sch=v.R.sch||[];
+    if(!sch.length)return;
+    const clr=VC_COLORS[i%VC_COLORS.length];
+    // Sample: show up to 150 points per variant
+    const step=Math.max(1,Math.ceil(sch.length/150));
+    const pts=sch.filter((_,idx)=>idx%step===0);
+    const payPts=pts.map(r=>({x:r.month,y:r.pay}));
+    const balPts=pts.map(r=>({x:r.month,y:r.bal}));
+    const baseDs={
+      label:v.name,
+      borderColor:clr,
+      backgroundColor:clr+'18',
+      pointRadius:0,pointHoverRadius:5,
+      borderWidth:2,tension:0.15,fill:false,
+      parsing:false
+    };
+    payDs.push({...baseDs,data:payPts});
+    balDs.push({...baseDs,data:balPts,fill:true});
+  });
+
+  const commonOpts={
+    responsive:true,maintainAspectRatio:false,
+    parsing:false,
+    plugins:{
+      legend:{display:true,position:'bottom',labels:{boxWidth:12,font:{size:11},padding:10}},
+      datalabels:{display:false},
+      tooltip:{callbacks:{
+        title:items=>`Месяц ${items[0].parsed.x}`,
+        label:item=>`${item.dataset.label}: ${fmt(item.parsed.y)} ₽`
+      }}
+    },
+    scales:{
+      x:{type:'linear',ticks:{maxTicksLimit:12,font:{size:10},color:'#9AAABB'},grid:{display:false},title:{display:true,text:'Месяц',color:'#9AAABB',font:{size:10}}},
+      y:{ticks:{callback:v=>fmt(v),maxTicksLimit:6,font:{size:11},color:'#9AAABB'},grid:{color:'#EEF1F8'}}
+    }
+  };
+
+  vcPayC=new Chart(document.getElementById('vc-pay-chart').getContext('2d'),{
+    type:'line',data:{datasets:payDs},
+    options:{...commonOpts,
+      plugins:{...commonOpts.plugins,
+        title:{display:false}},
+      scales:{...commonOpts.scales,
+        y:{...commonOpts.scales.y,title:{display:true,text:'Платёж, ₽',color:'#9AAABB',font:{size:10}}}
+      }
+    }
+  });
+
+  vcBalC=new Chart(document.getElementById('vc-bal-chart').getContext('2d'),{
+    type:'line',data:{datasets:balDs},
+    options:{...commonOpts,
+      plugins:{...commonOpts.plugins,
+        title:{display:false}},
+      scales:{...commonOpts.scales,
+        y:{...commonOpts.scales.y,title:{display:true,text:'Остаток, ₽',color:'#9AAABB',font:{size:10}}}
+      }
+    }
+  });
+}
+
+function renderCmpTable(){
+  const table=document.getElementById('cmpt');
+  let html='<thead><tr><th>Показатель</th>'+SVs.map(v=>'<th>'+v.name+'</th>').join('')+'</tr></thead><tbody>';
+
+  // Helper: render a standard key-based row
+  function keyRow(label,key,fmt_fn,best){
+    const vals=SVs.map(v=>v.R[key]||0);
+    const bestVal=best==='min'?Math.min(...vals):null;
+    return '<tr><td>'+label+'</td>'+SVs.map(v=>{
+      const val=v.R[key]||0;
+      const isBest=bestVal!==null&&val===bestVal&&vals.some(x=>x!==val);
+      return '<td class="'+(isBest?'best':'')+'">'+fmt_fn(val)+'</td>';
+    }).join('')+'</tr>';
+  }
+
+  // 1. Цена
+  html+=keyRow('Цена','price',v=>fmt(v)+' ₽','none');
+
+  // 2. Взнос % — перед суммой
+  html+=keyRow('Взнос %','dpPct',v=>fmtd(v,1)+'%','none');
+
+  // 3. Первоначальный взнос (сумма)
+  html+=keyRow('Первонач. взнос','dp',v=>fmt(v)+' ₽','none');
+
+  // 4. Рассрочка — с кратким описанием платежей выше строки суммы
+  const anyInst=SVs.some(v=>(v.R.instTotal||0)>0);
+  if(anyInst){
+    // строка с разбивкой платежей рассрочки
+    html+='<tr><td>Платежи рассрочки</td>'+SVs.map(v=>{
+      const s=summarizeInstPayments(v.R.sch);
+      return '<td style="line-height:1.6">'+(s||'—')+'</td>';
+    }).join('')+'</tr>';
+    // строка итога
+    html+=keyRow('Рассрочка (итого)','instTotal',v=>v?fmt(v)+' ₽':'—','none');
+  }
+
+  // 5. Ипотека (тело)
+  html+=keyRow('Ипотека (тело)','mortBal',v=>fmt(v)+' ₽','none');
+
+  // 6. Проценты
+  html+=keyRow('Проценты','totInt',v=>fmt(v)+' ₽','min');
+
+  // 7. Платёж/мес ипотеки — только ипотечная фаза
+  html+='<tr><td>Платёж/мес (ипотека)</td>'+SVs.map(v=>{
+    const mortSch=(v.R.sch||[]).filter(r=>r.phase==='mort');
+    const detail=summarizePayments(mortSch);
+    return '<td style="line-height:1.6">'+detail+'</td>';
+  }).join('')+'</tr>';
+
+  // 8. Срок
+  {
+    const vals=SVs.map(v=>v.R.totalMo||0);
+    const best=Math.min(...vals);
+    html+='<tr><td>Срок</td>'+SVs.map(v=>{
+      const val=v.R.totalMo||0;
+      const isBest=val===best&&vals.some(x=>x!==val);
+      return '<td class="'+(isBest?'best':'')+'">'+val+' мес</td>';
+    }).join('')+'</tr>';
+  }
+
+  // 9. Итоговая выплата — в конце
+  html+=keyRow('Итоговая выплата','totPay',v=>fmt(v)+' ₽','min');
+
+  // 10. Переплата — в конце
+  html+=keyRow('Переплата','overpay',v=>fmt(v)+' ₽','min');
+
+  html+='</tbody>';
+  table.innerHTML=html;
+}
+
+// ═══════════ STORAGE & IO ═══════════
+function saveLS(){try{localStorage.setItem('apt3',JSON.stringify(SVs));}catch(e){}}
+
+function exportJSON(){
+  if(!SVs.length){alert('Нет вариантов для экспорта');return;}
+  const blob=new Blob([JSON.stringify(SVs,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='kvartiry_'+new Date().toLocaleDateString('ru-RU').replace(/\./g,'-')+'.json';
+  a.click();
+}
+function importJSON(){document.getElementById('import-txt').value='';document.getElementById('file-in').click();}
+function onFile(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{document.getElementById('import-txt').value=ev.target.result;openModal('modal-import');};
+  r.readAsText(f);e.target.value='';
+}
+function doImport(){
+  try{
+    const data=JSON.parse(document.getElementById('import-txt').value);
+    if(!Array.isArray(data))throw new Error('Неверный формат');
+    let added=0;
+    data.forEach(v=>{if(!SVs.find(x=>x.id===v.id)){SVs.push(v);added++;}});
+    saveLS();closeModal('modal-import');
+    alert('Добавлено вариантов: '+added);
+    renderVarList();renderAnalytics(CR);
+  }catch(e){alert('Ошибка: '+e.message);}
+}
+
+function openModal(id){document.getElementById(id).style.display='flex';}
+function closeModal(id){document.getElementById(id).style.display='none';}
+
+function xlExport(){
+  if(!SVs.length){alert('Нет вариантов');return;}
+  const wb=XLSX.utils.book_new();
+  const sd=[
+    ['Калькулятор покупки квартиры'],['Дата:',new Date().toLocaleString('ru-RU')],[],
+    ['Вариант','ЖК','м²','Цена','ПВ','ПВ%','Рассрочка','Ипотека','Проценты','Страховка','Отделка','Доп.','Итого','Переплата','Платёж/мес','Срок мес'],
+    ...SVs.map(v=>[v.name,v.ref.zhk,v.ref.area,v.R.price,v.R.dp,v.R.dpPct/100,v.R.instTotal||0,v.R.mortBal||0,v.R.totInt||0,v.R.totIns||0,v.R.finishing||0,v.R.oneoff||0,v.R.totPay,v.R.overpay,v.R.firstPay||0,v.R.totalMo])
+  ];
+  const ws0=XLSX.utils.aoa_to_sheet(sd);
+  ws0['!cols']=[{wch:28},{wch:16},{wch:6},...Array(13).fill({wch:13})];
+  XLSX.utils.book_append_sheet(wb,ws0,'Сводная');
+  SVs.forEach(v=>{
+    const rows=[
+      ['Вариант:',v.name],['ЖК:',v.ref.zhk],['Площадь:',v.ref.area],['Заметки:',v.ref.note],[],
+      ['Цена:',v.R.price],['ПВ:',v.R.dp],['ПВ%:',v.R.dpPct/100],[],
+      ['Рассрочка:',v.R.instTotal||0],['Ипотека (тело):',v.R.mortBal||0],
+      ['Проценты:',v.R.totInt||0],['Страховка:',v.R.totIns||0],
+      ['Итого:',v.R.totPay],['Переплата:',v.R.overpay],['Платёж/мес:',v.R.firstPay||0],['Срок:',v.R.totalMo],[],
+      ['Месяц','Фаза','Платёж','Тело','Проценты','Страховка','Остаток'],
+      ...(v.R.sch||[]).map(r=>[r.month,r.phase==='inst'?'Рассрочка':r.isEarly?'Досрочно':'Ипотека',r.pay,r.pri,r.int,r.ins||0,r.bal])
+    ];
+    const ws=XLSX.utils.aoa_to_sheet(rows);
+    ws['!cols']=[{wch:10},{wch:12},{wch:14},{wch:14},{wch:14},{wch:14},{wch:14}];
+    XLSX.utils.book_append_sheet(wb,ws,v.name.substring(0,31).replace(/[\\\/\?\*:\[\]]/g,'_'));
+  });
+  XLSX.writeFile(wb,'Kvartiry_'+new Date().toLocaleDateString('ru-RU').replace(/\./g,'-')+'.xlsx');
+}
+
+
+
+// ═══════════════════════════════════════════
+// REALTOR INFO
+// ═══════════════════════════════════════════
+let realtorInfo = {name:'',phone:'',email:'',agency:'',logo:''};
+try{ realtorInfo = JSON.parse(localStorage.getItem('apt3-realtor')||'{}'); }catch(e){}
+
+function openRealtorModal(){
+  document.getElementById('rl-name').value = realtorInfo.name||'';
+  document.getElementById('rl-phone').value = realtorInfo.phone||'';
+  document.getElementById('rl-email').value = realtorInfo.email||'';
+  document.getElementById('rl-agency').value = realtorInfo.agency||'';
+  const lw = document.getElementById('rl-logo-wrap');
+  const lp = document.getElementById('rl-logo-preview');
+  if(realtorInfo.logo){ lp.src=realtorInfo.logo; lw.style.display='flex'; }
+  else { lw.style.display='none'; }
+  openModal('modal-realtor');
+}
+
+function saveRealtorInfo(){
+  realtorInfo.name = document.getElementById('rl-name').value.trim();
+  realtorInfo.phone = document.getElementById('rl-phone').value.trim();
+  realtorInfo.email = document.getElementById('rl-email').value.trim();
+  realtorInfo.agency = document.getElementById('rl-agency').value.trim();
+  // logo kept as is (updated via onRealtorLogo)
+  localStorage.setItem('apt3-realtor', JSON.stringify(realtorInfo));
+  updateRealtorHeader();
+  closeModal('modal-realtor');
+}
+
+function updateRealtorHeader(){
+  const el = document.getElementById('hdr-realtor-name');
+  if(!el) return;
+  if(realtorInfo.name){
+    el.textContent = realtorInfo.name + (realtorInfo.phone ? '  ·  ' + realtorInfo.phone : '') + (realtorInfo.agency ? '  ·  ' + realtorInfo.agency : '');
+  } else {
+    el.textContent = 'Рассрочка · Ипотека · Сравнение вариантов';
+  }
+}
+
+function onRealtorLogo(event){
+  const file = event.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    realtorInfo.logo = e.target.result;
+    document.getElementById('rl-logo-preview').src = e.target.result;
+    document.getElementById('rl-logo-wrap').style.display = 'flex';
+    document.getElementById('rl-logo-wrap').style.alignItems = 'center';
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearRealtorLogo(){
+  realtorInfo.logo = '';
+  document.getElementById('rl-logo-wrap').style.display = 'none';
+  document.getElementById('rl-logo-file').value = '';
+}
+
+// ═══════════════════════════════════════════
+// FLOOR PLAN
+// ═══════════════════════════════════════════
+let floorPlanB64 = '';
+
+function onFloorPlanFile(event){
+  const file = event.target.files[0]; if(!file) return;
+  if(file.size > 5*1024*1024){ alert('Файл слишком большой. Максимум 5 МБ.'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    floorPlanB64 = e.target.result;
+    document.getElementById('fp-preview').src = e.target.result;
+    document.getElementById('fp-preview-wrap').style.display = '';
+    recalc();
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearFloorPlan(){
+  floorPlanB64 = '';
+  document.getElementById('fp-preview-wrap').style.display = 'none';
+  document.getElementById('fp-file').value = '';
+  recalc();
+}
+
+
+// ═══════════════════════════════════════════
+// НАЛОГОВЫЙ ВЫЧЕТ — ст. 220 НК РФ
+// ═══════════════════════════════════════════
+let taxOwners = [
+  {name:'Собственник 1', share:100, usedProp:0, usedInt:0, canInt:true}
+];
+
+function addTaxOwner(){
+  const n = taxOwners.length + 1;
+  const share = taxOwners.length === 1 ? 50 : Math.floor(100/n);
+  taxOwners.push({name:'Собственник '+n, share, usedProp:0, usedInt:0, canInt:true});
+  // Normalize shares
+  if(taxOwners.length===2){ taxOwners[0].share=50; }
+  renderTaxOwners();
+  calcTax();
+}
+
+function removeTaxOwner(i){
+  if(taxOwners.length<=1) return;
+  taxOwners.splice(i,1);
+  // normalize
+  const total = taxOwners.reduce((s,o)=>s+o.share,0);
+  taxOwners.forEach(o=>o.share=Math.round(o.share/total*100));
+  taxOwners[0].share += 100 - taxOwners.reduce((s,o)=>s+o.share,0);
+  renderTaxOwners();
+  calcTax();
+}
+
+function renderTaxOwners(){
+  const w = document.getElementById('tax-owners-wrap');
+  if(!w) return;
+  w.innerHTML = taxOwners.map((o,i)=>`
+    <div style="border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;background:#fff">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <div style="flex:1;font-weight:700;font-size:13px;color:var(--navy)">${o.name}</div>
+        ${taxOwners.length>1?`<button class="btn-link" onclick="removeTaxOwner(${i})" style="font-size:11px;color:var(--red)">Удалить</button>`:''}
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div class="fg">
+          <label class="lbl">Имя</label>
+          <input type="text" value="${o.name}" oninput="taxOwners[${i}].name=this.value;calcTax()">
+        </div>
+        <div class="fg">
+          <label class="lbl">Доля, %</label>
+          <input type="text" class="ri" value="${o.share}" oninput="taxOwners[${i}].share=+this.value||0;calcTax()">
+        </div>
+      </div>
+      <div class="fg" style="margin-bottom:6px">
+        <label class="lbl">Использовал имущественный вычет ранее, ₽ <span style="text-transform:none;font-weight:400">(0 = не использовал)</span></label>
+        <div class="iw"><input type="text" class="ri" value="${o.usedProp?o.usedProp:''}" placeholder="0" oninput="taxOwners[${i}].usedProp=pn(this.value);calcTax()" onfocus="unfmt(this)" onblur="fmtf(this)"><span class="isfx">₽</span></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:4px">
+        <label style="font-size:12px;font-weight:600;color:var(--tx);cursor:pointer;display:flex;gap:7px;align-items:center">
+          <input type="checkbox" ${o.canInt?'checked':''} onchange="taxOwners[${i}].canInt=this.checked;calcTax()">
+          Может получить вычет по ипотечным процентам (не получал ранее)
+        </label>
+      </div>
+    </div>`).join('');
+}
+
+function calcTax(){
+  const r = document.getElementById('tax-result');
+  if(!r) return;
+  if(!CR){ r.innerHTML='<div class="empty"><div class="empty-ico">💰</div><div class="empty-ttl">Введите данные расчёта</div></div>'; return; }
+
+  const ndflRate = (+document.getElementById('tax-ndfl').value||13)/100;
+  const PROP_LIMIT = 2_000_000; // per person (both 2014-2024 and 2025+ = 2M)
+  const INT_LIMIT = 3_000_000;  // per person (once in lifetime)
+
+  const price = CR.price||0;
+  const totInt = CR.totInt||0; // total mortgage interest paid over life of loan
+  const dp = CR.dp||0;
+
+  let rows = '';
+  let totalReturn = 0;
+
+  taxOwners.forEach((owner, i) => {
+    const share = (owner.share||0)/100;
+    const ownerPrice = price * share;
+    const ownerInt = totInt * share;
+
+    // Property deduction
+    const propBase = Math.min(ownerPrice, PROP_LIMIT);
+    const propRemaining = Math.max(0, propBase - (owner.usedProp||0));
+    const propReturn = propRemaining * ndflRate;
+
+    // Interest deduction (one-time, one object)
+    let intReturn = 0;
+    let intNote = '';
+    if(owner.canInt && ownerInt > 0){
+      const intBase = Math.min(ownerInt, INT_LIMIT);
+      intReturn = intBase * ndflRate;
+    } else if(!owner.canInt){
+      intNote = ' (вычет уже использован)';
+    } else {
+      intNote = ' (нет ипотеки)';
+    }
+
+    const ownerTotal = propReturn + intReturn;
+    totalReturn += ownerTotal;
+
+    rows += `
+      <div style="border:1.5px solid var(--border);border-radius:11px;overflow:hidden;margin-bottom:10px">
+        <div style="padding:10px 14px;background:var(--navy);color:#fff;font-weight:700;font-size:13px">${owner.name} · доля ${owner.share}%</div>
+        <div style="padding:12px 14px;background:#fff">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">
+            <div style="text-align:center;padding:8px;background:#f8faff;border-radius:8px">
+              <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--tx2);margin-bottom:2px">Часть цены</div>
+              <div style="font-weight:800;color:var(--navy)">${fmt(ownerPrice)} ₽</div>
+            </div>
+            <div style="text-align:center;padding:8px;background:#f8faff;border-radius:8px">
+              <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--tx2);margin-bottom:2px">База вычета</div>
+              <div style="font-weight:800;color:var(--navy)">${fmt(propRemaining)} ₽</div>
+            </div>
+            <div style="text-align:center;padding:8px;background:var(--green2);border-radius:8px">
+              <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--green);margin-bottom:2px">Возврат</div>
+              <div style="font-weight:800;color:var(--green);font-size:16px">${fmt(Math.round(propReturn))} ₽</div>
+            </div>
+          </div>
+          ${owner.usedProp>0?`<div class="alert a-warn" style="font-size:11px;margin-bottom:8px">Уже использовано: ${fmt(owner.usedProp)} ₽ → остаток базы: ${fmt(propRemaining)} ₽</div>`:''}
+          <div style="border-top:1px solid var(--border);padding-top:10px;margin-top:2px">
+            <div style="font-size:11px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Вычет по ипотечным процентам${intNote}</div>
+            ${owner.canInt && ownerInt>0 ? `
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+              <div style="text-align:center;padding:8px;background:#f8faff;border-radius:8px">
+                <div style="font-size:10px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.3px;margin-bottom:2px">Уплач. проценты</div>
+                <div style="font-weight:800;color:var(--navy)">${fmt(Math.round(ownerInt))} ₽</div>
+              </div>
+              <div style="text-align:center;padding:8px;background:#f8faff;border-radius:8px">
+                <div style="font-size:10px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.3px;margin-bottom:2px">База (лимит 3 млн)</div>
+                <div style="font-weight:800;color:var(--navy)">${fmt(Math.min(Math.round(ownerInt),INT_LIMIT))} ₽</div>
+              </div>
+              <div style="text-align:center;padding:8px;background:var(--green2);border-radius:8px">
+                <div style="font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.3px;margin-bottom:2px">Возврат</div>
+                <div style="font-weight:800;color:var(--green);font-size:16px">${fmt(Math.round(intReturn))} ₽</div>
+              </div>
+            </div>` : `<div style="color:var(--tx2);font-size:12px;font-style:italic">Не применимо${intNote}</div>`}
+          </div>
+          <div style="margin-top:12px;padding:10px 14px;background:linear-gradient(135deg,#1A365D,#2A5298);border-radius:9px;display:flex;justify-content:space-between;align-items:center">
+            <span style="color:rgba(255,255,255,.7);font-size:12px;font-weight:600">Итого к возврату</span>
+            <span style="color:#FFD700;font-weight:800;font-size:18px">${fmt(Math.round(ownerTotal))} ₽</span>
+          </div>
+        </div>
+      </div>`;
+  });
+
+  // Grand total
+  rows += `
+    <div style="padding:14px 18px;background:linear-gradient(135deg,#1A365D,#1E4080);border-radius:12px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 3px 12px rgba(26,54,93,.25)">
+      <div>
+        <div style="color:rgba(255,255,255,.7);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px">Суммарный возврат по всем собственникам</div>
+        <div style="color:rgba(255,255,255,.55);font-size:11px;margin-top:2px">НДФЛ ${Math.round(ndflRate*100)}% · Ставка актуальна с 2025 г.</div>
+      </div>
+      <div style="color:#FFD700;font-weight:800;font-size:24px;letter-spacing:-.5px">${fmt(Math.round(totalReturn))} ₽</div>
+    </div>`;
+
+  r.innerHTML = rows;
+}
+
+
+// ═══════════════════════════════════════════
+// ТРАНШЕВАЯ И КОМБИ-ИПОТЕКА
+// ═══════════════════════════════════════════
+let trancheOn = false, combiOn = false;
+
+function onTrancheTog(){
+  trancheOn = document.getElementById('tranche-on').checked;
+  document.getElementById('tranche-fields').style.display = trancheOn ? 'flex' : 'none';
+  document.getElementById('tranche-tag').style.display = trancheOn ? '' : 'none';
+  recalc();
+}
+
+function onCombiTog(){
+  combiOn = document.getElementById('combi-on').checked;
+  document.getElementById('combi-fields').style.display = combiOn ? 'flex' : 'none';
+  document.getElementById('combi-tag').style.display = combiOn ? '' : 'none';
+  recalc();
+}
+
+function calcTranchePreview(mortBal, mortTerm){
+  const on = trancheOn && document.getElementById('tranche-on')?.checked;
+  const rb = document.getElementById('tr-result-box');
+  if(!rb) return;
+  if(!on || mortBal<=0){ rb.style.display='none'; return; }
+  const trAmt1 = Math.min(pn(document.getElementById('tr-amt1').value)||0, mortBal);
+  const trR1 = (+document.getElementById('tr-rate1').value||0.1)/100/12;
+  const trR2 = (+document.getElementById('tr-rate2').value||6)/100/12;
+  const pay1 = trAmt1 * trR1;
+  // Full annuity on mortBal at trR2 for mortTerm
+  const r2=trR2, n=mortTerm;
+  const pay2 = (r2<0.00001) ? mortBal/n : mortBal*r2*Math.pow(1+r2,n)/(Math.pow(1+r2,n)-1);
+  rb.style.display='';
+  document.getElementById('tr-pay1-val').textContent = fmt(Math.round(pay1)) + ' ₽/мес';
+  const p2el = document.getElementById('tr-pay2-info');
+  if(p2el) p2el.textContent = 'После сдачи: ' + fmt(Math.round(pay2)) + ' ₽/мес';
+}
+
+function calcCombiPreview(mortBal, mortTerm){
+  const on = combiOn && document.getElementById('combi-on')?.checked;
+  const rb = document.getElementById('cb-result-box');
+  if(!rb) return;
+  if(!on || mortBal<=0){ rb.style.display='none'; return; }
+  const amt1 = Math.min(pn(document.getElementById('cb-amt1').value)||0, mortBal);
+  const amt2raw = pn(document.getElementById('cb-amt2').value)||0;
+  const amt2 = amt2raw>0 ? Math.min(amt2raw, mortBal-amt1) : Math.max(0, mortBal-amt1);
+  const r1=(+document.getElementById('cb-rate1').value||6)/100/12;
+  const r2=(+document.getElementById('cb-rate2').value||18)/100/12;
+  const n=mortTerm;
+  function ann(b,r){ if(b<=0)return 0; if(r<0.00001)return b/n; const f=Math.pow(1+r,n); return b*r*f/(f-1); }
+  const pay1=ann(amt1,r1), pay2=ann(amt2,r2), total=pay1+pay2;
+  const hint=document.getElementById('cb-amt2-hint');
+  if(hint&&!amt2raw) hint.textContent='= '+fmt(Math.round(amt2))+' ₽ (остаток)';
+  rb.style.display='';
+  document.getElementById('cb-pay1-val').textContent=fmt(Math.round(pay1))+' ₽';
+  document.getElementById('cb-pay2-val').textContent=fmt(Math.round(pay2))+' ₽';
+  document.getElementById('cb-pay-total').textContent=fmt(Math.round(total))+' ₽';
+}
+
+// Override recalc to also call these previews
+// We hook into the existing recalc's summary rendering
+const _origSumRender = typeof renderSummary === 'function' ? renderSummary : null;
+
+
+// ═══════════════════════════════════════════
+// PDF EXPORT
+// ═══════════════════════════════════════════
+
+// Build consecutive payment periods from schedule
+function kpPeriods(sch){
+  if(!sch||!sch.length) return [];
+  const Rnd=v=>Math.round(v/1000)*1000;
+  const runs=[];
+  let cp=Rnd(sch[0].pay),ch=sch[0].phase,st=sch[0].month;
+  for(let i=1;i<sch.length;i++){
+    const p=Rnd(sch[i].pay),h=sch[i].phase;
+    if(p!==cp||h!==ch){runs.push({pay:cp,phase:ch,from:st,to:sch[i-1].month});cp=p;ch=h;st=sch[i].month;}
+  }
+  runs.push({pay:cp,phase:ch,from:st,to:sch[sch.length-1].month});
+  return runs;
+}
+
+function buildKpHtml(r, variant){
+  if(!r) return '';
+  const rl  = realtorInfo;
+  const areaRaw = variant ? (variant.ref&&variant.ref.area||'') : (document.getElementById('r-area').value||'');
+  const area = parseFloat(areaRaw)||0;
+  const zhk  = variant ? (variant.ref&&variant.ref.zhk||'')  : (document.getElementById('r-zhk').value||'');
+  const note = variant ? (variant.ref&&variant.ref.note||'') : (document.getElementById('r-note').value||'');
+  const fp   = (variant&&variant.P&&variant.P.floorPlan) || floorPlanB64;
+  const P    = variant ? variant.P : null;
+  const vRateRows = P ? (P.rateRows||[{from:1,rate:'8.5'}]) : (typeof rateRows!=='undefined'?rateRows:[{from:1,rate:'8.5'}]);
+  const mortTerm  = P ? (parseInt(P.mortTerm)||240) : (parseInt(document.getElementById('mort-mo')?.value)||240);
+  const payTypeName = (P?P.payType:(typeof payType!=='undefined'?payType:'ann'))==='dif'?'Дифференцированный':'Аннуитет';
+
+  const today = new Date().toLocaleDateString('ru-RU',{day:'2-digit',month:'long',year:'numeric'});
+  const totalMo = r.sch ? r.sch.length : (r.totalMo||0);
+  const years = totalMo/12;
+  const sqmP  = area>0 ? Math.round(r.price/area) : 0;
+  const sqmT  = area>0 ? Math.round(r.totPay/area) : 0;
+
+  // Tax deduction (13% baseline — displayed as estimate)
+  const ndfl = 0.13;
+  const propBase   = Math.min(r.price||0, 2000000);
+  const propReturn = Math.round(propBase * ndfl);
+  const intBase    = Math.min(r.totInt||0, 3000000);
+  const intReturn  = Math.round(intBase * ndfl);
+  const totalReturn = propReturn + intReturn;
+
+  // Payment periods from schedule
+  const periods = kpPeriods(r.sch||[]);
+  const instPeriods = periods.filter(p=>p.phase==='inst');
+  const mortPeriods = periods.filter(p=>p.phase==='mort');
+  const maxPay = periods.reduce((m,p)=>Math.max(m,p.pay),1);
+
+  // Format helpers (used in JS context, not in PDF window)
+  const f  = v=>new Intl.NumberFormat('ru-RU').format(Math.round(v));
+  const fd = (v,d)=>(+v).toFixed(d).replace('.',',');
+
+  // Build rate rows description for mortgage block
+  const rateDesc = vRateRows.map((row,i)=>{
+    const nextFrom = vRateRows[i+1] ? parseInt(vRateRows[i+1].from) : mortTerm+1;
+    const mos = nextFrom - parseInt(row.from);
+    return `${mos} мес · ${row.rate}%`;
+  }).join(' → ');
+
+  // Build CSS bar chart rows for payment dynamics
+  function barRow(period, color, label){
+    const widthPct = Math.round(period.pay/maxPay*100);
+    const rangeStr = period.from===period.to ? `мес ${period.from}` : `мес ${period.from}–${period.to}`;
+    return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:12px">
+      <div style="width:80px;flex-shrink:0;color:#64748b;font-size:11px">${rangeStr}</div>
+      <div style="flex:1;background:#F1F5F9;border-radius:4px;height:22px;overflow:hidden">
+        <div style="width:${widthPct}%;background:${color};height:100%;border-radius:4px;min-width:4px;display:flex;align-items:center;padding-left:8px">
+          ${widthPct>30?`<span style="color:#fff;font-weight:700;font-size:11px">${f(period.pay)} ₽</span>`:''}
+        </div>
+      </div>
+      ${widthPct<=30?`<div style="font-weight:700;color:#1A365D;font-size:11px;width:90px">${f(period.pay)} ₽</div>`:'<div style="width:90px"></div>'}
+    </div>`;
+  }
+
+  const instBars  = instPeriods.map(p=>barRow(p,'#B8862A','inst')).join('');
+  const mortBars  = mortPeriods.map(p=>barRow(p,'#2E6FBF','mort')).join('');
+
+  return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>${zhk||'Расчёт квартиры'} — ${today}</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#1A365D;background:#fff;padding:28px 36px;font-size:13px}
+  .wrap{max-width:820px;margin:0 auto}
+
+  /* HEADER */
+  .hdr{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:16px;border-bottom:2.5px solid #1A365D;margin-bottom:22px}
+  .hdr-left{display:flex;align-items:center;gap:14px}
+  .hdr-logo{max-height:52px;max-width:160px;object-fit:contain}
+  .hdr-rl-name{font-size:15px;font-weight:800;color:#1A365D}
+  .hdr-rl-sub{font-size:11px;color:#64748b;margin-top:2px;line-height:1.6}
+  .hdr-right{text-align:right}
+  .obj-title{font-size:22px;font-weight:800;color:#1A365D;line-height:1.2}
+  .obj-sub{font-size:12px;color:#64748b;margin-top:3px}
+  .obj-date{font-size:11px;color:#94a3b8;margin-top:6px}
+
+  /* TOP LAYOUT */
+  .top-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:22px;align-items:start}
+  .fp-img{width:100%;max-height:230px;object-fit:contain;border-radius:10px;border:1px solid #E2E8F0;background:#f8fafc;display:block}
+  .fp-empty{width:100%;height:180px;border-radius:10px;border:2px dashed #CBD5E1;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:12px}
+
+  /* DEAL STRUCTURE TABLE */
+  .deal-table{width:100%;border-collapse:collapse}
+  .deal-table td{padding:7px 4px;border-bottom:1px solid #F1F5F9;font-size:13px;vertical-align:middle}
+  .deal-table td:last-child{text-align:right;font-weight:700;color:#1A365D;white-space:nowrap}
+  .deal-table .total-row td{border-top:2px solid #1A365D;border-bottom:none;padding-top:10px;font-weight:800;font-size:15px}
+  .deal-table .sub-row td{font-size:11px;color:#64748b;padding:3px 4px;border-bottom:none}
+
+  /* SECTION BLOCK */
+  .sblock{border:1.5px solid #E2E8F0;border-radius:12px;margin-bottom:16px;overflow:hidden}
+  .sblock-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:#F8FAFC;border-bottom:1px solid #E2E8F0}
+  .sblock-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:#475569}
+  .sblock-badge{font-size:12px;font-weight:700;color:#1A365D;background:#E0E8FF;padding:3px 10px;border-radius:12px}
+  .sblock-body{padding:14px 16px}
+
+  /* PAYMENT CARD */
+  .pay-meta{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+  .pay-chip{background:#F0F4FF;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;color:#1A365D}
+  .pay-chip.gold{background:#FFFBEB;color:#92400E}
+  .pay-chip.green{background:#ECFDF5;color:#14532d}
+  .pay-chip.red{background:#FEF2F2;color:#991B1B}
+
+  /* TAX */
+  .tax-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+  .tax-card{background:#F8FAFC;border-radius:10px;padding:12px 14px;border:1px solid #E2E8F0}
+  .tax-card-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#64748b;margin-bottom:6px}
+  .tax-row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:1px solid #F1F5F9}
+  .tax-row:last-child{border-bottom:none}
+  .tax-total{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:linear-gradient(135deg,#1A365D,#2A5298);border-radius:10px;color:#fff}
+
+  .sec-lbl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#94a3b8;margin:0 0 10px}
+
+  /* FOOTER */
+  .footer{margin-top:24px;padding-top:12px;border-top:1px solid #E2E8F0;display:flex;justify-content:space-between;font-size:10px;color:#94a3b8}
+  @media print{body{padding:12px 20px}button{display:none!important}.sblock{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HEADER: только данные риелтора -->
+  <div class="hdr">
+    <div class="hdr-left">
+      ${rl.logo?`<img src="${rl.logo}" class="hdr-logo" alt="">`:``}
+      <div>
+        <div class="hdr-rl-name">${rl.name||'Консультация по квартире'}</div>
+        <div class="hdr-rl-sub">${[rl.agency,rl.phone,rl.email].filter(Boolean).join(' · ')}</div>
+      </div>
+    </div>
+    <div class="hdr-right">
+      ${zhk?`<div class="obj-title">${zhk}</div>`:''}
+      <div class="obj-sub">${[area?(area+' м²'):'',note].filter(Boolean).join(' · ')}</div>
+      <div class="obj-date">${today}</div>
+    </div>
+  </div>
+
+  <!-- ПЛАНИРОВКА + СТРУКТУРА СДЕЛКИ -->
+  <div class="top-grid">
+    <div>
+      ${fp?`<img src="${fp}" class="fp-img" alt="Планировка">`:`<div class="fp-empty">Планировка не загружена</div>`}
+    </div>
+    <div>
+      <div class="sec-lbl">Структура сделки</div>
+      <table class="deal-table">
+        <tr><td>Цена квартиры</td><td>${f(r.price)} ₽</td></tr>
+        <tr class="sub-row"><td colspan="2">Первоначальный взнос: ${f(r.dp)} ₽ (${fd(r.dp/r.price*100,1)}%)</td></tr>
+        ${r.instTotal>0?`<tr><td>Рассрочка</td><td>${f(r.instTotal)} ₽</td></tr>`:''}
+        ${r.mortBal>0?`<tr><td>Ипотека (тело кредита)</td><td>${f(r.mortBal)} ₽</td></tr>`:''}
+        ${r.totInt>0?`<tr><td>Проценты по ипотеке</td><td>${f(r.totInt)} ₽</td></tr>`:''}
+        ${r.finishing>0?`<tr><td>Отделка</td><td>${f(r.finishing)} ₽</td></tr>`:''}
+        <tr class="total-row">
+          <td>Итого выплат</td>
+          <td>${f(r.totPay)} ₽</td>
+        </tr>
+        ${sqmT>0?`<tr class="sub-row"><td colspan="2">${f(sqmP)} ₽/м² базовая · ${f(sqmT)} ₽/м² итоговая</td></tr>`:''}
+      </table>
+    </div>
+  </div>
+
+  ${r.instTotal>0?`
+  <!-- РАССРОЧКА -->
+  <div class="sblock">
+    <div class="sblock-hdr">
+      <div class="sblock-title">Рассрочка</div>
+      <div class="sblock-badge">${f(r.instTotal)} ₽</div>
+    </div>
+    <div class="sblock-body">
+      <div class="pay-meta">
+        <span class="pay-chip">Срок: ${P?P.instMo:(r.sch?r.sch.filter(s=>s.phase==='inst').length:0)} мес</span>
+        ${instPeriods.length>0?`<span class="pay-chip gold">Платёж: ${f(instPeriods[0].pay)} ₽/мес</span>`:''}
+      </div>
+      ${instPeriods.length>1?`<div class="sec-lbl">Платежи по периодам</div>${instBars}`:`${instBars}`}
+    </div>
+  </div>`:''}
+
+  ${r.mortBal>0?`
+  <!-- ИПОТЕКА -->
+  <div class="sblock">
+    <div class="sblock-hdr">
+      <div class="sblock-title">Ипотека</div>
+      <div class="sblock-badge">${f(r.mortBal)} ₽ · ${fd(mortTerm/12,0)} лет</div>
+    </div>
+    <div class="sblock-body">
+      <div class="pay-meta">
+        <span class="pay-chip">${payTypeName}</span>
+        <span class="pay-chip">${rateDesc}</span>
+        ${mortPeriods.length>0?`<span class="pay-chip gold">от ${f(mortPeriods[0].pay)} ₽/мес</span>`:''}
+        ${r.totInt>0?`<span class="pay-chip red">Переплата: ${f(r.totInt)} ₽</span>`:''}
+      </div>
+      ${mortPeriods.length>0?`<div class="sec-lbl">Динамика платежей</div>${mortBars}`:''}
+    </div>
+  </div>`:''}
+
+  ${instBars||mortBars?`
+  <!-- ВИЗУАЛИЗАЦИЯ ВСЕХ ПЛАТЕЖЕЙ -->
+  <div class="sblock">
+    <div class="sblock-hdr">
+      <div class="sblock-title">Динамика платежей по месяцам</div>
+      <div style="display:flex;gap:12px;font-size:11px;color:#64748b;align-items:center">
+        ${instPeriods.length>0?`<span><span style="display:inline-block;width:10px;height:10px;background:#B8862A;border-radius:2px;margin-right:4px"></span>Рассрочка</span>`:''}
+        ${mortPeriods.length>0?`<span><span style="display:inline-block;width:10px;height:10px;background:#2E6FBF;border-radius:2px;margin-right:4px"></span>Ипотека</span>`:''}
+      </div>
+    </div>
+    <div class="sblock-body">
+      ${periods.map(p=>barRow(p, p.phase==='inst'?'#B8862A':'#2E6FBF', p.phase)).join('')}
+    </div>
+  </div>`:''}
+
+  ${totalReturn>0?`
+  <!-- НАЛОГОВЫЙ ВЫЧЕТ -->
+  <div class="sblock">
+    <div class="sblock-hdr">
+      <div class="sblock-title">Налоговый вычет — ст. 220 НК РФ</div>
+      <div class="sblock-badge" style="background:#ECFDF5;color:#14532d">+${f(totalReturn)} ₽</div>
+    </div>
+    <div class="sblock-body">
+      <div class="tax-grid">
+        <div class="tax-card">
+          <div class="tax-card-lbl">Имущественный вычет</div>
+          <div class="tax-row"><span>База расчёта</span><span style="font-weight:700">${f(propBase)} ₽</span></div>
+          <div class="tax-row" style="color:#64748b;font-size:11px"><span>мин(цена, 2 000 000 ₽)</span></div>
+          <div class="tax-row"><span>Ставка НДФЛ</span><span style="font-weight:700">13%</span></div>
+          <div style="margin-top:8px;padding:8px 10px;background:#ECFDF5;border-radius:8px;display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:11px;color:#14532d;font-weight:700">К возврату</span>
+            <span style="font-size:15px;font-weight:800;color:#14532d">${f(propReturn)} ₽</span>
+          </div>
+        </div>
+        ${intReturn>0?`<div class="tax-card">
+          <div class="tax-card-lbl">Вычет по процентам ипотеки</div>
+          <div class="tax-row"><span>База расчёта</span><span style="font-weight:700">${f(intBase)} ₽</span></div>
+          <div class="tax-row" style="color:#64748b;font-size:11px"><span>мин(проценты, 3 000 000 ₽)</span></div>
+          <div class="tax-row"><span>Ставка НДФЛ</span><span style="font-weight:700">13%</span></div>
+          <div style="margin-top:8px;padding:8px 10px;background:#ECFDF5;border-radius:8px;display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:11px;color:#14532d;font-weight:700">К возврату</span>
+            <span style="font-size:15px;font-weight:800;color:#14532d">${f(intReturn)} ₽</span>
+          </div>
+        </div>`:``}
+      </div>
+      <div class="tax-total">
+        <div>
+          <div style="font-size:11px;color:rgba(255,255,255,.7);font-weight:700;text-transform:uppercase;letter-spacing:.4px">Суммарный возврат НДФЛ</div>
+          <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:2px">Оценочно · ставка 13% · за весь срок</div>
+        </div>
+        <div style="font-size:22px;font-weight:800;color:#FFD700">+${f(totalReturn)} ₽</div>
+      </div>
+    </div>
+  </div>`:''}
+
+  <div class="footer">
+    <span>${[rl.name,rl.phone,rl.email].filter(Boolean).join(' · ')}</span>
+    <span>Расчёт носит предварительный характер · ${today}</span>
+  </div>
+
+  <div style="text-align:center;margin-top:20px">
+    <button onclick="window.print()" style="padding:10px 32px;background:#1A365D;color:#FFD700;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">🖨 Сохранить PDF</button>
+  </div>
+
+</div>
+</body>
+</html>`;
+}
+
+function exportPdfVariant(variantIdx){
+  let r, variant;
+  if(variantIdx !== undefined && SVs[variantIdx]){
+    variant = SVs[variantIdx];
+    r = variant.R;
+  } else {
+    r = CR;
+    variant = null;
+  }
+  if(!r){ alert('Сначала введите данные для расчёта'); return; }
+  const html = buildKpHtml(r, variant);
+  const w = window.open('','_blank','width=900,height=700');
+  w.document.write(html);
+  w.document.close();
+}
+
+function exportPdfCompare(){
+  if(SVs.length < 2){ alert('Нужно минимум 2 сохранённых варианта для сравнения'); return; }
+  const rl = realtorInfo;
+  const today = new Date().toLocaleDateString('ru-RU',{day:'2-digit',month:'long',year:'numeric'});
+  const mi = key => Math.min(...SVs.map(v=>v.R[key]||0));
+  const ma = key => Math.max(...SVs.map(v=>v.R[key]||0));
+
+  const rows = SVs.map(v => {
+    const years = (v.R.totalMo||0)/12;
+    const sqmT = v.ref&&v.ref.area&&v.ref.area>0 ? Math.round(v.R.totPay/v.ref.area) : 0;
+    const totalVyc = (Math.min(v.R.price||0,2000000)*0.13) + (Math.min(v.R.totInt||0,3000000)*0.13);
+    return {v, years, sqmT, totalVyc};
+  });
+
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Сравнение вариантов — ${today}</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#1A365D;background:#fff;padding:28px 32px}
+  .pdf-kp{max-width:900px;margin:0 auto}
+  .pdf-hdr{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:18px;border-bottom:3px solid #1A365D;margin-bottom:22px}
+  .pdf-rl-name{font-size:16px;font-weight:800}
+  .pdf-rl-sub{font-size:12px;color:#64748b;margin-top:3px}
+  .kp-badge{background:linear-gradient(135deg,#1A365D,#2A5298);color:#FFD700;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;padding:5px 14px;border-radius:20px;display:inline-block}
+  table{width:100%;border-collapse:collapse;margin-top:10px}
+  th{background:#1A365D;color:#fff;padding:9px 12px;text-align:center;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+  th:first-child{text-align:left}
+  td{padding:8px 12px;border-bottom:1px solid #E2E8F0;text-align:center;font-size:12px}
+  td:first-child{text-align:left;font-weight:700;color:#1A365D}
+  tr:hover td{background:#F8FAFC}
+  .best{background:#ECFDF5;color:#1E8A5E;font-weight:800}
+  .worst{color:#DC2626}
+  .sec{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#64748b;border-bottom:1.5px solid #E2E8F0;padding-bottom:6px;margin:20px 0 10px}
+  .winner-box{background:linear-gradient(135deg,#ECFDF5,#D1FAE5);border:1.5px solid #1E8A5E;border-radius:12px;padding:16px 20px;margin-top:20px}
+  .pdf-footer{margin-top:28px;padding-top:12px;border-top:1px solid #E2E8F0;font-size:10px;color:#94a3b8;display:flex;justify-content:space-between}
+  @media print{button{display:none}}
+</style>
+</head>
+<body>
+<div class="pdf-kp">
+  <div class="pdf-hdr">
+    <div>
+      ${rl.logo?`<img src="${rl.logo}" style="max-height:50px;max-width:160px;object-fit:contain;display:block;margin-bottom:6px" alt="лого">`:''}
+      <div class="pdf-rl-name">${rl.name||'Сравнение вариантов'}</div>
+      <div class="pdf-rl-sub">${[rl.agency,rl.phone].filter(Boolean).join(' · ')}</div>
+    </div>
+    <div style="text-align:right">
+      <div class="kp-badge">Сравнение вариантов</div>
+      <div style="font-size:11px;color:#94a3b8;margin-top:6px">${today}</div>
+    </div>
+  </div>
+
+  <div class="sec">Финансовое сравнение</div>
+  <table>
+    <thead>
+      <tr>
+        <th>Вариант</th>
+        <th>Цена, ₽</th>
+        <th>Итого выплат, ₽</th>
+        <th>Переплата, ₽</th>
+        <th>Платёж/мес, ₽</th>
+        <th>Срок, лет</th>
+        <th>Вычет (оценка), ₽</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${rows.map(({v,years,sqmT,totalVyc})=>`<tr>
+        <td>${v.name}${v.ref&&v.ref.zhk?'<br><span style="font-size:10px;font-weight:400;color:#64748b">'+v.ref.zhk+'</span>':''}</td>
+        <td>${fmt(v.R.price)}</td>
+        <td class="${v.R.totPay===mi('totPay')?'best':v.R.totPay===ma('totPay')?'worst':''}">${fmt(v.R.totPay)}</td>
+        <td class="${v.R.overpay===mi('overpay')?'best':v.R.overpay===ma('overpay')?'worst':''}">${fmt(v.R.overpay)}</td>
+        <td>${v.R.firstPay?fmt(v.R.firstPay):'—'}</td>
+        <td class="${v.R.totalMo===mi('totalMo')?'best':''}">${fmtd(years,1)}</td>
+        <td class="best" style="color:#1E8A5E">${totalVyc>0?'+'+fmt(Math.round(totalVyc)):'—'}</td>
+      </tr>`).join('')}
+    </tbody>
+  </table>
+
+  <div class="sec" style="margin-top:24px">Выводы</div>
+  <div class="winner-box">
+    <div style="font-size:14px;font-weight:800;color:#1E8A5E;margin-bottom:8px">🏆 Оптимальный вариант</div>
+    <div style="font-size:13px;color:#14532d;line-height:1.6">
+      Минимальная переплата: <strong>${SVs.find(v=>v.R.overpay===mi('overpay')).name}</strong> (${fmt(mi('overpay'))} ₽)<br>
+      Минимальный платёж: <strong>${SVs.find(v=>(v.R.firstPay||Infinity)===mi('firstPay')).name}</strong> (${fmt(mi('firstPay'))} ₽/мес)<br>
+      Минимальный срок: <strong>${SVs.find(v=>v.R.totalMo===mi('totalMo')).name}</strong> (${fmtd(mi('totalMo')/12,1)} лет)<br>
+      Наибольший вычет: <strong>${rows.sort((a,b)=>b.totalVyc-a.totalVyc)[0].v.name}</strong> (+${fmt(Math.round(rows[0].totalVyc))} ₽)
+    </div>
+  </div>
+
+  <div class="pdf-footer">
+    <span>${rl.name||''} · ${rl.phone||''}</span>
+    <span>Расчёт подготовлен ${today} · Предварительный, не является офертой</span>
+  </div>
+
+  <div style="text-align:center;margin-top:18px">
+    <button onclick="window.print()" style="padding:10px 28px;background:#1A365D;color:#FFD700;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">🖨 Распечатать / Сохранить PDF</button>
+  </div>
+</div>
+</body>
+</html>`;
+
+  const w = window.open('','_blank','width=960,height=700');
+  w.document.write(html);
+  w.document.close();
+}
+
+
+function updateAccStates(){
+  // Highlight accordion sections that have meaningful data filled
+  const states = {
+    'ref': !!(document.getElementById('r-zhk').value||document.getElementById('r-area').value),
+    'price': !!(pn(document.getElementById('price').value)),
+    'inst': document.getElementById('inst-on')?.checked,
+    'mort': document.getElementById('mort-on')?.checked,
+    'tranche': document.getElementById('tranche-on')?.checked,
+    'combi': document.getElementById('combi-on')?.checked,
+    'extra': !!(pn(document.getElementById('insur').value)||pn(document.getElementById('oneoff').value)),
+  };
+  Object.entries(states).forEach(([id,active])=>{
+    const el = document.getElementById('A-'+id);
+    if(el) el.classList.toggle('acc-active', !!active);
+  });
+}
+
+
+function clearCalc(){
+  if(!confirm('Очистить все введённые данные? Сохранённые варианты останутся.')) return;
+
+  // Object & reference
+  document.getElementById('r-zhk').value='';
+  document.getElementById('r-area').value='';
+  document.getElementById('r-note').value='';
+  clearFloorPlan();
+
+  // Price & DP
+  document.getElementById('price').value='';
+  document.getElementById('dp-amt').value='';
+  document.getElementById('dp-pct').value='';
+  document.getElementById('matcap').value='';
+  document.getElementById('finishing').value='';
+  document.getElementById('oneoff').value='';
+  dpMode='a';
+  document.getElementById('dp-a').checked=true;
+  document.getElementById('dp-aw').style.display='';
+  document.getElementById('dp-pw').style.display='none';
+  document.getElementById('dpbox').style.display='none';
+
+  // Installment
+  document.getElementById('inst-on').checked=false;
+  document.getElementById('inst-fields').style.display='none';
+  document.getElementById('inst-tag').style.display='none';
+  document.getElementById('inst-mo').value='23';
+  document.getElementById('inst-yr').value='1.9';
+  specRules=[{months:'12, 18',rate:'5'}];
+  renderRules();
+
+  // Mortgage
+  document.getElementById('mort-on').checked=true;
+  document.getElementById('mort-fields').style.display='flex';
+  document.getElementById('mort-tag').style.display='';
+  document.getElementById('mort-mo').value='240';
+  document.getElementById('mort-yr').value='20';
+  rateRows=[{from:1,rate:'8.5'}];
+  renderRateRows();
+  payType='ann';
+  document.getElementById('pt-ann').checked=true;
+  document.getElementById('insur').value='';
+  earlyPayments=[];
+  renderEP();
+
+  // Tranche
+  if(document.getElementById('tranche-on')){
+    document.getElementById('tranche-on').checked=false;
+    trancheOn=false;
+    document.getElementById('tranche-fields').style.display='none';
+    document.getElementById('tranche-tag').style.display='none';
+    document.getElementById('tr-amt1').value='';
+    document.getElementById('tr-build-mo').value='24';
+    document.getElementById('tr-rate1').value='0.1';
+    document.getElementById('tr-rate2').value='6';
+    const rb=document.getElementById('tr-result-box');
+    if(rb) rb.style.display='none';
+  }
+
+  // Combi
+  if(document.getElementById('combi-on')){
+    document.getElementById('combi-on').checked=false;
+    combiOn=false;
+    document.getElementById('combi-fields').style.display='none';
+    document.getElementById('combi-tag').style.display='none';
+    document.getElementById('cb-amt1').value='';
+    document.getElementById('cb-amt2').value='';
+    document.getElementById('cb-rate1').value='6';
+    document.getElementById('cb-rate2').value='18';
+    const rb=document.getElementById('cb-result-box');
+    if(rb) rb.style.display='none';
+  }
+
+  // Early payments
+  earlyPayments=[];
+  renderEP();
+
+  CR=null;
+  renderAll(null);
+  updateAccStates();
+}
+
+
+window.addEventListener('DOMContentLoaded',()=>{
+  updateRealtorHeader();
+  renderTaxOwners();
+  renderRules();
+  renderRateRows();
+  renderEP();
+  recalc();
+});
+</script>
+</body>
+</html>
+
+
