@@ -534,16 +534,16 @@ hr{border:none;border-top:1px solid var(--border);margin:4px 0}
   </div>
 </div>
 
-<!-- 6. Комби-ипотека -->
+<!-- 6. Комбо-ипотека -->
 <div class="acc" id="A-combi">
   <div class="acc-hdr" onclick="togAcc('combi')">
-    <div class="acc-ttl"><span class="acc-ico">🔀</span>Комби-ипотека<span class="tag tag-on" id="combi-tag" style="display:none">вкл</span></div>
+    <div class="acc-ttl"><span class="acc-ico">🔀</span>Комбо-ипотека<span class="tag tag-on" id="combi-tag" style="display:none">вкл</span></div>
     <div class="acc-arr" id="arr-combi">▼</div>
   </div>
   <div class="acc-body" id="body-combi">
     <div class="alert a-info" style="font-size:11px;margin-bottom:4px">Льготная программа на часть суммы + рыночная ставка на остаток. Пример: 12 млн под 6% (Семейная) + 3 млн под 18%.</div>
     <div class="togrow">
-      <span class="toglbl">Включить комби-ипотеку</span>
+      <span class="toglbl">Включить комбо-ипотеку</span>
       <label class="tog"><input type="checkbox" id="combi-on" onchange="onCombiTog()"><span class="togsl"></span></label>
     </div>
     <div id="combi-fields" style="display:none;flex-direction:column;gap:10px">
@@ -641,8 +641,6 @@ hr{border:none;border-top:1px solid var(--border);margin:4px 0}
     <div class="tab on" data-t="chart" onclick="setTab('chart')">📊 График</div>
     <div class="tab" data-t="sched" onclick="setTab('sched')">📋 Платежи</div>
     <div class="tab" data-t="vars" onclick="setTab('vars')">💾 Варианты</div>
-    <div class="tab" data-t="an" onclick="setTab('an')">📈 Аналитика</div>
-    <div class="tab" data-t="rvb" onclick="setTab('rvb')">🏠 Аренда vs Покупка</div>
     <div class="tab" data-t="tax" onclick="setTab('tax')">💰 Налоговый вычет</div>
   </div>
 
@@ -666,10 +664,10 @@ hr{border:none;border-top:1px solid var(--border);margin:4px 0}
     </div>
     <div style="overflow:auto;max-height:calc(100vh - 260px)">
       <table class="scht">
-        <thead><tr><th>№</th><th>Фаза</th><th>Платёж</th><th>Тело</th><th>Проценты</th><th>Страховка</th><th>Остаток</th></tr></thead>
+        <thead><tr><th>№</th><th>Фаза</th><th>Платёж</th><th>Тело</th><th>Проценты</th><th>Остаток</th></tr></thead>
         <tbody id="sched-body"></tbody>
         <tfoot><tr id="sched-foot" style="display:none">
-          <td colspan="2">Итого</td><td id="ft-pay">—</td><td id="ft-pri">—</td><td id="ft-int">—</td><td id="ft-ins">—</td><td>—</td>
+          <td colspan="2">Итого</td><td id="ft-pay">—</td><td id="ft-pri">—</td><td id="ft-int">—</td><td>—</td>
         </tr></tfoot>
       </table>
     </div>
@@ -743,24 +741,15 @@ hr{border:none;border-top:1px solid var(--border);margin:4px 0}
     </div>
 
     <!-- NDFL rate -->
-    <div class="row2" style="margin-bottom:14px;gap:10px">
-      <div class="fg">
-        <label class="lbl">Ставка НДФЛ <span style="text-transform:none;font-weight:400">(прогрессивная с 2025)</span></label>
-        <select id="tax-ndfl" onchange="calcTax()">
-          <option value="13">13% (доход до 2,4 млн/год)</option>
-          <option value="15">15% (2,4–5 млн/год)</option>
-          <option value="18">18% (5–20 млн/год)</option>
-          <option value="20">20% (20–50 млн/год)</option>
-          <option value="22">22% (свыше 50 млн/год)</option>
-        </select>
-      </div>
-      <div class="fg">
-        <label class="lbl">Год покупки</label>
-        <select id="tax-year" onchange="calcTax()">
-          <option value="2014">2014–2024 (лимит 2 млн)</option>
-          <option value="2025" selected>2025+ (лимит 2 млн)</option>
-        </select>
-      </div>
+    <div style="margin-bottom:14px">
+      <label class="lbl">Ставка НДФЛ <span style="text-transform:none;font-weight:400">(зависит от годового дохода, прогрессивная с 2025)</span></label>
+      <select id="tax-ndfl" onchange="calcTax()" style="width:100%">
+        <option value="13">13% — доход до 2,4 млн ₽ в год</option>
+        <option value="15">15% — доход 2,4–5 млн ₽ в год</option>
+        <option value="18">18% — доход 5–20 млн ₽ в год</option>
+        <option value="20">20% — доход 20–50 млн ₽ в год</option>
+        <option value="22">22% — доход свыше 50 млн ₽ в год</option>
+      </select>
     </div>
 
     <!-- Results -->
@@ -771,10 +760,11 @@ hr{border:none;border-top:1px solid var(--border);margin:4px 0}
     <!-- Info block -->
     <div class="alert a-info" style="margin-top:16px;font-size:12px;line-height:1.6">
       <strong>Как работает вычет:</strong><br>
-      • <strong>Имущественный</strong> — 13–22% от стоимости жилья, лимит 2 000 000 ₽ на человека. Можно добирать на разных объектах (если куплено после 2014 г.).<br>
-      • <strong>По ипотечным процентам</strong> — 13–22% от уплаченных %, лимит 3 000 000 ₽ на человека. <strong>Только раз в жизни на один объект.</strong><br>
-      • При общей совместной собственности супруги могут распределить вычет по заявлению в любой пропорции.<br>
-      • Вычет можно получать ежегодно по мере уплаты налогов (через декларацию или у работодателя).
+      • <strong>Имущественный</strong> — возврат НДФЛ от стоимости жилья, лимит базы 2 000 000 ₽ на человека (максимум 260 000 ₽ при ставке 13%). Можно добирать на разных объектах.<br>
+      • <strong>По ипотечным процентам</strong> — возврат НДФЛ от уплаченных процентов, лимит базы 3 000 000 ₽ на человека. <strong>Только раз в жизни и только на один объект.</strong><br>
+      • <strong>Важно:</strong> вычет получают только официально трудоустроенные — с официальной зарплаты, с которой платится НДФЛ. Если дохода недостаточно, вычет растягивается на несколько лет.<br>
+      • Супруги могут распределить вычет в любой пропорции по заявлению — удобно, если у одного доход выше.<br>
+      • Получить можно через налоговую (декларация 3-НДФЛ) или напрямую у работодателя.
     </div>
   </div>
 
@@ -1505,16 +1495,14 @@ function renderSched(r){
     <td><strong>${fmt(d.pay)} ₽</strong></td>
     <td>${fmt(d.pri)} ₽</td>
     <td>${d.int>0?fmt(d.int)+' ₽':'—'}</td>
-    <td>${d.ins>0?fmt(d.ins)+' ₽':'—'}</td>
     <td>${fmt(d.bal)} ₽</td>
   </tr>`).join('');
   const tp=rows.reduce((s,x)=>s+x.pay,0),tpr=rows.reduce((s,x)=>s+x.pri,0);
-  const ti=rows.reduce((s,x)=>s+x.int,0),tins=rows.reduce((s,x)=>s+(x.ins||0),0);
+  const ti=rows.reduce((s,x)=>s+x.int,0);
   ft.style.display='';
   document.getElementById('ft-pay').textContent=fmt(tp)+' ₽';
   document.getElementById('ft-pri').textContent=fmt(tpr)+' ₽';
   document.getElementById('ft-int').textContent=ti>0?fmt(ti)+' ₽':'—';
-  document.getElementById('ft-ins').textContent=tins>0?fmt(tins)+' ₽':'—';
   if(pages<=1){pg.innerHTML='';return;}
   let h=`<button class="pgb" onclick="goPage(${schPage-1})" ${schPage===1?'disabled':''}>←</button>`;
   for(let p=1;p<=pages;p++){
@@ -2140,31 +2128,88 @@ function openModal(id){document.getElementById(id).style.display='flex';}
 function closeModal(id){document.getElementById(id).style.display='none';}
 
 function xlExport(){
-  if(!SVs.length){alert('Нет вариантов');return;}
-  const wb=XLSX.utils.book_new();
-  const sd=[
-    ['Калькулятор покупки квартиры'],['Дата:',new Date().toLocaleString('ru-RU')],[],
-    ['Вариант','ЖК','м²','Цена','ПВ','ПВ%','Рассрочка','Ипотека','Проценты','Страховка','Отделка','Доп.','Итого','Переплата','Платёж/мес','Срок мес'],
-    ...SVs.map(v=>[v.name,v.ref.zhk,v.ref.area,v.R.price,v.R.dp,v.R.dpPct/100,v.R.instTotal||0,v.R.mortBal||0,v.R.totInt||0,v.R.totIns||0,v.R.finishing||0,v.R.oneoff||0,v.R.totPay,v.R.overpay,v.R.firstPay||0,v.R.totalMo])
-  ];
-  const ws0=XLSX.utils.aoa_to_sheet(sd);
-  ws0['!cols']=[{wch:28},{wch:16},{wch:6},...Array(13).fill({wch:13})];
-  XLSX.utils.book_append_sheet(wb,ws0,'Сводная');
-  SVs.forEach(v=>{
-    const rows=[
-      ['Вариант:',v.name],['ЖК:',v.ref.zhk],['Площадь:',v.ref.area],['Заметки:',v.ref.note],[],
-      ['Цена:',v.R.price],['ПВ:',v.R.dp],['ПВ%:',v.R.dpPct/100],[],
-      ['Рассрочка:',v.R.instTotal||0],['Ипотека (тело):',v.R.mortBal||0],
-      ['Проценты:',v.R.totInt||0],['Страховка:',v.R.totIns||0],
-      ['Итого:',v.R.totPay],['Переплата:',v.R.overpay],['Платёж/мес:',v.R.firstPay||0],['Срок:',v.R.totalMo],[],
-      ['Месяц','Фаза','Платёж','Тело','Проценты','Страховка','Остаток'],
-      ...(v.R.sch||[]).map(r=>[r.month,r.phase==='inst'?'Рассрочка':r.isEarly?'Досрочно':'Ипотека',r.pay,r.pri,r.int,r.ins||0,r.bal])
+  if(!SVs.length){alert('Нет сохранённых вариантов');return;}
+  try{
+    const wb = XLSX.utils.book_new();
+    const rl = realtorInfo;
+
+    // ── Сводная ──────────────────────────────────────────────────────
+    const sd=[
+      [rl.name||'Калькулятор покупки квартиры','',rl.agency||'',rl.phone||'',rl.email||''],
+      ['Дата:',new Date().toLocaleDateString('ru-RU')],
+      [],
+      ['Вариант','ЖК','м²','Цена','ПВ','ПВ%','Рассрочка','Ипотека','Проценты','Отделка','Итого','Переплата','Платёж/мес','Срок мес'],
+      ...SVs.map(v=>[
+        v.name||'',
+        (v.ref&&v.ref.zhk)||'',
+        parseFloat((v.ref&&v.ref.area)||0)||0,
+        v.R.price||0,
+        v.R.dp||0,
+        (v.R.dpPct||0)/100,
+        v.R.instTotal||0,
+        v.R.mortBal||0,
+        v.R.totInt||0,
+        v.R.finishing||0,
+        v.R.totPay||0,
+        v.R.overpay||0,
+        v.R.firstPay||0,
+        v.R.totalMo||0
+      ])
     ];
-    const ws=XLSX.utils.aoa_to_sheet(rows);
-    ws['!cols']=[{wch:10},{wch:12},{wch:14},{wch:14},{wch:14},{wch:14},{wch:14}];
-    XLSX.utils.book_append_sheet(wb,ws,v.name.substring(0,31).replace(/[\\\/\?\*:\[\]]/g,'_'));
-  });
-  XLSX.writeFile(wb,'Kvartiry_'+new Date().toLocaleDateString('ru-RU').replace(/\./g,'-')+'.xlsx');
+    const ws0=XLSX.utils.aoa_to_sheet(sd);
+    ws0['!cols']=[{wch:28},{wch:16},{wch:6},{wch:13},{wch:13},{wch:7},{wch:13},{wch:13},{wch:13},{wch:11},{wch:13},{wch:13},{wch:13},{wch:9}];
+    // Числовые форматы сводной
+    SVs.forEach((_,i)=>{
+      const r=5+i;
+      ['D','E','G','H','I','J','K','L','M'].forEach(c=>{if(ws0[c+r])ws0[c+r].z='# ##0';});
+      if(ws0['F'+r])ws0['F'+r].z='0.0%';
+    });
+    XLSX.utils.book_append_sheet(wb,ws0,'Сводная');
+
+    // ── Листы по вариантам ────────────────────────────────────────────
+    SVs.forEach(v=>{
+      const rows=[
+        [rl.name||'',rl.agency||'',rl.phone||'',rl.email||''],
+        [],
+        ['Вариант:',v.name||''],
+        ['ЖК:',(v.ref&&v.ref.zhk)||''],
+        ['Площадь:',parseFloat((v.ref&&v.ref.area)||0)||0,'м²'],
+        ...((v.ref&&v.ref.note)?[['Заметка:',v.ref.note]]:[]),
+        [],
+        ['Цена квартиры:',v.R.price||0],
+        ['Первонач. взнос:',v.R.dp||0,'',(v.R.dpPct||0)/100],
+        ...(v.R.instTotal>0?[['Рассрочка:',v.R.instTotal||0]]:[]),
+        ...(v.R.mortBal>0?[['Ипотека (тело):',v.R.mortBal||0,'Проценты:',v.R.totInt||0]]:[]),
+        ...(v.R.finishing>0?[['Отделка:',v.R.finishing||0]]:[]),
+        ['Итого выплат:',v.R.totPay||0],
+        ['Переплата:',v.R.overpay||0,'Платёж/мес:',v.R.firstPay||0],
+        ['Срок:',v.R.totalMo||0,'мес'],
+        [],
+        ['Месяц','Фаза','Платёж','Основной долг','Проценты','Остаток'],
+        ...(v.R.sch||[]).map(r=>[r.month,r.phase==='inst'?'Рассрочка':r.isEarly?'Досрочно':'Ипотека',r.pay,r.pri,r.int,r.bal])
+      ];
+      const ws=XLSX.utils.aoa_to_sheet(rows);
+      ws['!cols']=[{wch:20},{wch:14},{wch:13},{wch:14},{wch:13},{wch:13}];
+      // Числовой формат для таблицы платежей
+      const hdrIdx=rows.findIndex(r=>Array.isArray(r)&&r[0]==='Месяц');
+      if(hdrIdx>=0){
+        const schStart=hdrIdx+2; // 1-based строка первой строки данных
+        for(let i=0;i<(v.R.sch||[]).length;i++){
+          const row=schStart+i;
+          ['C','D','E','F'].forEach(c=>{if(ws[c+row])ws[c+row].z='# ##0';});
+        }
+      }
+      let sheetName=(v.name||'Вариант').substring(0,28).replace(/[\\\/?*:[\]|]/g,'_');
+      let sn=sheetName, sfx=2;
+      while(wb.SheetNames.includes(sn)) sn=sheetName.substring(0,25)+'('+sfx+')', sfx++;
+      XLSX.utils.book_append_sheet(wb,ws,sn);
+    });
+
+    XLSX.writeFile(wb,'Kvartiry_'+new Date().toLocaleDateString('ru-RU').replace(/\./g,'-')+'.xlsx');
+  } catch(e){
+    alert('Ошибка Excel: '+e.message);
+    console.error(e);
+  }
 }
 
 
@@ -2286,29 +2331,32 @@ function renderTaxOwners(){
   w.innerHTML = taxOwners.map((o,i)=>`
     <div style="border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;background:#fff">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-        <div style="flex:1;font-weight:700;font-size:13px;color:var(--navy)">${o.name}</div>
+        <input type="text" value="${o.name}" oninput="taxOwners[${i}].name=this.value;calcTax()" style="flex:1;font-weight:700;font-size:13px;color:var(--navy);border:none;background:transparent;padding:0;outline:none">
         ${taxOwners.length>1?`<button class="btn-link" onclick="removeTaxOwner(${i})" style="font-size:11px;color:var(--red)">Удалить</button>`:''}
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
-        <div class="fg">
-          <label class="lbl">Имя</label>
-          <input type="text" value="${o.name}" oninput="taxOwners[${i}].name=this.value;calcTax()">
-        </div>
-        <div class="fg">
-          <label class="lbl">Доля, %</label>
+
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+        <label class="lbl" style="margin:0;white-space:nowrap">Доля при подаче вычета</label>
+        <div class="iw" style="width:100px;flex-shrink:0">
           <input type="text" class="ri" value="${o.share}" oninput="taxOwners[${i}].share=+this.value||0;calcTax()">
+          <span class="isfx">%</span>
         </div>
+        <span style="font-size:11px;color:var(--tx2)">(как распределить вычет между собственниками — можно в любой пропорции)</span>
       </div>
-      <div class="fg" style="margin-bottom:6px">
-        <label class="lbl">Использовал имущественный вычет ранее, ₽ <span style="text-transform:none;font-weight:400">(0 = не использовал)</span></label>
-        <div class="iw"><input type="text" class="ri" value="${o.usedProp?o.usedProp:''}" placeholder="0" oninput="taxOwners[${i}].usedProp=pn(this.value);calcTax()" onfocus="unfmt(this)" onblur="fmtf(this)"><span class="isfx">₽</span></div>
+
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+        <label class="lbl" style="margin:0;white-space:nowrap">Ранее получен вычет на сумму жилья</label>
+        <div class="iw" style="width:160px;flex-shrink:0">
+          <input type="text" class="ri" value="${o.usedProp?fmt(o.usedProp):''}" placeholder="0" oninput="taxOwners[${i}].usedProp=pn(this.value);calcTax()" onfocus="unfmt(this)" onblur="fmtf(this)">
+          <span class="isfx">₽</span>
+        </div>
+        <span style="font-size:11px;color:var(--tx2)">(стоимость объекта, по которому уже был вычет; 0 — если не использовал)</span>
       </div>
-      <div style="display:flex;align-items:center;gap:10px;margin-top:4px">
-        <label style="font-size:12px;font-weight:600;color:var(--tx);cursor:pointer;display:flex;gap:7px;align-items:center">
-          <input type="checkbox" ${o.canInt?'checked':''} onchange="taxOwners[${i}].canInt=this.checked;calcTax()">
-          Может получить вычет по ипотечным процентам (не получал ранее)
-        </label>
-      </div>
+
+      <label style="font-size:12px;font-weight:600;color:var(--tx);cursor:pointer;display:flex;gap:7px;align-items:center">
+        <input type="checkbox" ${o.canInt?'checked':''} onchange="taxOwners[${i}].canInt=this.checked;calcTax()">
+        Ещё не получал вычет по ипотечным процентам (только раз в жизни)
+      </label>
     </div>`).join('');
 }
 
@@ -2540,15 +2588,15 @@ function buildKpHtml(r, variant){
   // Build CSS bar chart rows for payment dynamics
   function barRow(period, color, label){
     const widthPct = Math.round(period.pay/maxPay*100);
-    const rangeStr = period.from===period.to ? `мес ${period.from}` : `мес ${period.from}–${period.to}`;
-    return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:12px">
-      <div style="width:80px;flex-shrink:0;color:#64748b;font-size:11px">${rangeStr}</div>
-      <div style="flex:1;background:#F1F5F9;border-radius:4px;height:22px;overflow:hidden">
-        <div style="width:${widthPct}%;background:${color};height:100%;border-radius:4px;min-width:4px;display:flex;align-items:center;padding-left:8px">
-          ${widthPct>30?`<span style="color:#fff;font-weight:700;font-size:11px">${f(period.pay)} ₽</span>`:''}
+    const rangeStr = period.from===period.to ? `${period.from}м` : `${period.from}–${period.to}м`;
+    return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;font-size:11px">
+      <div style="width:54px;flex-shrink:0;color:#64748b;font-size:10px">${rangeStr}</div>
+      <div style="flex:1;background:#F1F5F9;border-radius:3px;height:18px;overflow:hidden">
+        <div style="width:${widthPct}%;background:${color};height:100%;border-radius:3px;min-width:4px;display:flex;align-items:center;padding-left:6px">
+          ${widthPct>28?`<span style="color:#fff;font-weight:700;font-size:10px">${f(period.pay)} ₽</span>`:''}
         </div>
       </div>
-      ${widthPct<=30?`<div style="font-weight:700;color:#1A365D;font-size:11px;width:90px">${f(period.pay)} ₽</div>`:'<div style="width:90px"></div>'}
+      ${widthPct<=28?`<div style="font-weight:700;color:#1A365D;font-size:10px;width:80px;flex-shrink:0">${f(period.pay)} ₽</div>`:'<div style="width:80px;flex-shrink:0"></div>'}
     </div>`;
   }
 
@@ -2631,8 +2679,7 @@ function buildKpHtml(r, variant){
     </div>
     <div class="hdr-right">
       ${zhk?`<div class="obj-title">${zhk}</div>`:''}
-      <div class="obj-sub">${[area?(area+' м²'):'',note].filter(Boolean).join(' · ')}</div>
-      <div class="obj-date">${today}</div>
+      <div class="obj-sub">${area?(area+' м²'):''}</div>
     </div>
   </div>
 
@@ -2645,66 +2692,45 @@ function buildKpHtml(r, variant){
       <div class="sec-lbl">Структура сделки</div>
       <table class="deal-table">
         <tr><td>Цена квартиры</td><td>${f(r.price)} ₽</td></tr>
-        <tr class="sub-row"><td colspan="2">Первоначальный взнос: ${f(r.dp)} ₽ (${fd(r.dp/r.price*100,1)}%)</td></tr>
-        ${r.instTotal>0?`<tr><td>Рассрочка</td><td>${f(r.instTotal)} ₽</td></tr>`:''}
-        ${r.mortBal>0?`<tr><td>Ипотека (тело кредита)</td><td>${f(r.mortBal)} ₽</td></tr>`:''}
-        ${r.totInt>0?`<tr><td>Проценты по ипотеке</td><td>${f(r.totInt)} ₽</td></tr>`:''}
+        ${sqmP>0?`<tr class="sub-row"><td colspan="2">${f(sqmP)} ₽ за м²</td></tr>`:''}
+        <tr><td>Первоначальный взнос</td><td>${f(r.dp)} ₽ (${fd(r.dp/r.price*100,1)}%)</td></tr>
+        ${r.instTotal>0?`<tr><td>Рассрочка</td><td>${f(r.instTotal)} ₽ · ${P?P.instMo:(r.sch?(r.sch.filter(s=>s.phase==='inst').length):0)} мес · ${instPeriods.length>0?f(instPeriods[0].pay)+' ₽/мес':''}</td></tr>`:''}
+        ${r.mortBal>0?`<tr><td>Ипотека</td><td>${f(r.mortBal)} ₽ · ${rateDesc}${mortPeriods.length>0?' · '+f(mortPeriods[0].pay)+' ₽/мес':''}</td></tr>`:''}
         ${r.finishing>0?`<tr><td>Отделка</td><td>${f(r.finishing)} ₽</td></tr>`:''}
-        <tr class="total-row">
-          <td>Итого выплат</td>
-          <td>${f(r.totPay)} ₽</td>
-        </tr>
-        ${sqmT>0?`<tr class="sub-row"><td colspan="2">${f(sqmP)} ₽/м² базовая · ${f(sqmT)} ₽/м² итоговая</td></tr>`:''}
       </table>
     </div>
   </div>
 
-  ${r.instTotal>0?`
-  <!-- РАССРОЧКА -->
-  <div class="sblock">
-    <div class="sblock-hdr">
-      <div class="sblock-title">Рассрочка</div>
-      <div class="sblock-badge">${f(r.instTotal)} ₽</div>
-    </div>
-    <div class="sblock-body">
-      <div class="pay-meta">
-        <span class="pay-chip">Срок: ${P?P.instMo:(r.sch?r.sch.filter(s=>s.phase==='inst').length:0)} мес</span>
-        ${instPeriods.length>0?`<span class="pay-chip gold">Платёж: ${f(instPeriods[0].pay)} ₽/мес</span>`:''}
-      </div>
-      ${instPeriods.length>1?`<div class="sec-lbl">Платежи по периодам</div>${instBars}`:`${instBars}`}
-    </div>
-  </div>`:''}
-
-  ${r.mortBal>0?`
-  <!-- ИПОТЕКА -->
-  <div class="sblock">
-    <div class="sblock-hdr">
-      <div class="sblock-title">Ипотека</div>
-      <div class="sblock-badge">${f(r.mortBal)} ₽ · ${fd(mortTerm/12,0)} лет</div>
-    </div>
-    <div class="sblock-body">
-      <div class="pay-meta">
-        <span class="pay-chip">${payTypeName}</span>
-        <span class="pay-chip">${rateDesc}</span>
-        ${mortPeriods.length>0?`<span class="pay-chip gold">от ${f(mortPeriods[0].pay)} ₽/мес</span>`:''}
-        ${r.totInt>0?`<span class="pay-chip red">Переплата: ${f(r.totInt)} ₽</span>`:''}
-      </div>
-      ${mortPeriods.length>0?`<div class="sec-lbl">Динамика платежей</div>${mortBars}`:''}
-    </div>
-  </div>`:''}
+  ${note?`<div style="margin-bottom:14px;padding:9px 14px;background:#F8FAFC;border-radius:10px;font-size:11px;color:#475569;line-height:1.65;border:1px solid #E2E8F0;word-break:break-word"><strong style="color:#1A365D">Заметка:</strong> ${note}</div>`:''}
 
   ${instBars||mortBars?`
-  <!-- ВИЗУАЛИЗАЦИЯ ВСЕХ ПЛАТЕЖЕЙ -->
-  <div class="sblock">
+  <!-- ПЛАТЕЖИ (компактно) -->
+  <div class="sblock" style="margin-bottom:14px">
     <div class="sblock-hdr">
-      <div class="sblock-title">Динамика платежей по месяцам</div>
-      <div style="display:flex;gap:12px;font-size:11px;color:#64748b;align-items:center">
-        ${instPeriods.length>0?`<span><span style="display:inline-block;width:10px;height:10px;background:#B8862A;border-radius:2px;margin-right:4px"></span>Рассрочка</span>`:''}
-        ${mortPeriods.length>0?`<span><span style="display:inline-block;width:10px;height:10px;background:#2E6FBF;border-radius:2px;margin-right:4px"></span>Ипотека</span>`:''}
+      <div class="sblock-title">Предстоящие платежи</div>
+      <div style="display:flex;gap:10px;font-size:11px;color:#64748b;align-items:center">
+        ${instPeriods.length>0?`<span><span style="display:inline-block;width:8px;height:8px;background:#B8862A;border-radius:2px;margin-right:3px;vertical-align:middle"></span>Рассрочка</span>`:''}
+        ${mortPeriods.length>0?`<span><span style="display:inline-block;width:8px;height:8px;background:#2E6FBF;border-radius:2px;margin-right:3px;vertical-align:middle"></span>Ипотека</span>`:''}
       </div>
     </div>
-    <div class="sblock-body">
-      ${periods.map(p=>barRow(p, p.phase==='inst'?'#B8862A':'#2E6FBF', p.phase)).join('')}
+    <div class="sblock-body" style="padding:10px 16px">
+      ${r.instTotal>0 && r.mortBal>0 ? `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px">
+        <div>
+          <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:#B8862A;margin-bottom:7px">Рассрочка · ${f(r.instTotal)} ₽ · ${P?P.instMo:(r.sch?r.sch.filter(s=>s.phase==='inst').length:0)} мес</div>
+          ${instBars}
+        </div>
+        <div>
+          <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:#2E6FBF;margin-bottom:7px">Ипотека · ${f(r.mortBal)} ₽ · ${rateDesc}</div>
+          ${mortBars}
+          ${r.totInt>0?`<div style="margin-top:5px;font-size:10px;color:#991B1B;font-weight:600">Переплата: ${f(r.totInt)} ₽</div>`:''}
+        </div>
+      </div>` : r.instTotal>0 ? `
+      <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:#B8862A;margin-bottom:7px">Рассрочка · ${f(r.instTotal)} ₽ · ${P?P.instMo:(r.sch?r.sch.filter(s=>s.phase==='inst').length:0)} мес</div>
+      ${instBars}` : `
+      <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:#2E6FBF;margin-bottom:7px">Ипотека · ${f(r.mortBal)} ₽ · ${rateDesc} · ${payTypeName}</div>
+      ${mortBars}
+      ${r.totInt>0?`<div style="margin-top:5px;font-size:10px;color:#991B1B;font-weight:600">Переплата: ${f(r.totInt)} ₽</div>`:''}`}
     </div>
   </div>`:''}
 
@@ -2720,7 +2746,7 @@ function buildKpHtml(r, variant){
         <div class="tax-card">
           <div class="tax-card-lbl">Имущественный вычет</div>
           <div class="tax-row"><span>База расчёта</span><span style="font-weight:700">${f(propBase)} ₽</span></div>
-          <div class="tax-row" style="color:#64748b;font-size:11px"><span>мин(цена, 2 000 000 ₽)</span></div>
+          <div class="tax-row" style="color:#64748b;font-size:11px"><span>Вычет с суммы покупки, но не более 2 000 000 ₽ по НК РФ</span></div>
           <div class="tax-row"><span>Ставка НДФЛ</span><span style="font-weight:700">13%</span></div>
           <div style="margin-top:8px;padding:8px 10px;background:#ECFDF5;border-radius:8px;display:flex;justify-content:space-between;align-items:center">
             <span style="font-size:11px;color:#14532d;font-weight:700">К возврату</span>
@@ -2730,20 +2756,13 @@ function buildKpHtml(r, variant){
         ${intReturn>0?`<div class="tax-card">
           <div class="tax-card-lbl">Вычет по процентам ипотеки</div>
           <div class="tax-row"><span>База расчёта</span><span style="font-weight:700">${f(intBase)} ₽</span></div>
-          <div class="tax-row" style="color:#64748b;font-size:11px"><span>мин(проценты, 3 000 000 ₽)</span></div>
+          <div class="tax-row" style="color:#64748b;font-size:11px"><span>Вычет с фактически уплаченных %, но не более 3 000 000 ₽</span></div>
           <div class="tax-row"><span>Ставка НДФЛ</span><span style="font-weight:700">13%</span></div>
           <div style="margin-top:8px;padding:8px 10px;background:#ECFDF5;border-radius:8px;display:flex;justify-content:space-between;align-items:center">
             <span style="font-size:11px;color:#14532d;font-weight:700">К возврату</span>
             <span style="font-size:15px;font-weight:800;color:#14532d">${f(intReturn)} ₽</span>
           </div>
         </div>`:``}
-      </div>
-      <div class="tax-total">
-        <div>
-          <div style="font-size:11px;color:rgba(255,255,255,.7);font-weight:700;text-transform:uppercase;letter-spacing:.4px">Суммарный возврат НДФЛ</div>
-          <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:2px">Оценочно · ставка 13% · за весь срок</div>
-        </div>
-        <div style="font-size:22px;font-weight:800;color:#FFD700">+${f(totalReturn)} ₽</div>
       </div>
     </div>
   </div>`:''}
@@ -2786,97 +2805,116 @@ function exportPdfCompare(){
   const ma = key => Math.max(...SVs.map(v=>v.R[key]||0));
 
   const rows = SVs.map(v => {
-    const years = (v.R.totalMo||0)/12;
-    const sqmT = v.ref&&v.ref.area&&v.ref.area>0 ? Math.round(v.R.totPay/v.ref.area) : 0;
-    const totalVyc = (Math.min(v.R.price||0,2000000)*0.13) + (Math.min(v.R.totInt||0,3000000)*0.13);
-    return {v, years, sqmT, totalVyc};
+    const fp = (v.P && v.P.floorPlan) || null;
+    const condParts = [];
+    if(v.R.instTotal>0){
+      const mos = v.P ? (v.P.instMo||0) : (v.R.sch?v.R.sch.filter(s=>s.phase==='inst').length:0);
+      const instPds = kpPeriods(v.R.sch||[]).filter(p=>p.phase==='inst');
+      const firstPay = instPds.length>0 ? fmt(instPds[0].pay)+' ₽/мес' : '';
+      condParts.push('Рассрочка: '+mos+' мес'+(firstPay?', от '+firstPay:''));
+    }
+    if(v.R.mortBal>0){
+      const rr = v.P?(v.P.rateRows||[{from:1,rate:'8.5'}]):[{from:1,rate:'8.5'}];
+      const mt = v.P?(parseInt(v.P.mortTerm)||240):240;
+      const rd = rr.length===1 ? rr[0].rate+'%' : rr.map(r=>r.rate+'%').join('→');
+      const mortPds = kpPeriods(v.R.sch||[]).filter(p=>p.phase==='mort');
+      const firstPay = mortPds.length>0 ? fmt(mortPds[0].pay)+' ₽/мес' : '';
+      condParts.push('Ипотека: '+Math.round(mt/12)+' лет '+rd+(firstPay?', '+firstPay:''));
+    }
+    const cond = condParts.length>0 ? condParts.join('<br>') : '—';
+    return {v, fp, cond};
   });
 
   const html = `<!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
-<title>Сравнение вариантов — ${today}</title>
+<title>Сравнение вариантов</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#1A365D;background:#fff;padding:28px 32px}
-  .pdf-kp{max-width:900px;margin:0 auto}
-  .pdf-hdr{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:18px;border-bottom:3px solid #1A365D;margin-bottom:22px}
-  .pdf-rl-name{font-size:16px;font-weight:800}
-  .pdf-rl-sub{font-size:12px;color:#64748b;margin-top:3px}
-  .kp-badge{background:linear-gradient(135deg,#1A365D,#2A5298);color:#FFD700;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;padding:5px 14px;border-radius:20px;display:inline-block}
-  table{width:100%;border-collapse:collapse;margin-top:10px}
-  th{background:#1A365D;color:#fff;padding:9px 12px;text-align:center;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
-  th:first-child{text-align:left}
-  td{padding:8px 12px;border-bottom:1px solid #E2E8F0;text-align:center;font-size:12px}
-  td:first-child{text-align:left;font-weight:700;color:#1A365D}
-  tr:hover td{background:#F8FAFC}
-  .best{background:#ECFDF5;color:#1E8A5E;font-weight:800}
-  .worst{color:#DC2626}
-  .sec{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#64748b;border-bottom:1.5px solid #E2E8F0;padding-bottom:6px;margin:20px 0 10px}
-  .winner-box{background:linear-gradient(135deg,#ECFDF5,#D1FAE5);border:1.5px solid #1E8A5E;border-radius:12px;padding:16px 20px;margin-top:20px}
-  .pdf-footer{margin-top:28px;padding-top:12px;border-top:1px solid #E2E8F0;font-size:10px;color:#94a3b8;display:flex;justify-content:space-between}
-  @media print{button{display:none}}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#1A365D;background:#fff;padding:22px 30px;font-size:13px}
+  .wrap{max-width:920px;margin:0 auto}
+  .hdr{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:13px;border-bottom:2.5px solid #1A365D;margin-bottom:18px}
+  .rl-logo{max-height:46px;max-width:150px;object-fit:contain}
+  .rl-name{font-size:15px;font-weight:800;color:#1A365D}
+  .rl-sub{font-size:11px;color:#64748b;margin-top:2px}
+  table{width:100%;border-collapse:collapse}
+  th{background:#1A365D;color:#fff;padding:9px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;text-align:left;vertical-align:bottom}
+  td{padding:10px 12px;border-bottom:1px solid #E2E8F0;font-size:12px;vertical-align:top}
+  td:first-child{font-weight:700;color:#1A365D}
+  tr:nth-child(even) td{background:#F8FAFC}
+  .fp-mini{max-height:70px;max-width:88px;object-fit:contain;border-radius:6px;border:1px solid #E2E8F0;display:block;margin-top:6px}
+  .sub{font-size:10px;color:#64748b;margin-top:2px;line-height:1.4}
+  .note-txt{font-size:10px;color:#94a3b8;margin-top:6px;line-height:1.5;word-break:break-word;font-style:italic;max-width:180px}
+  .cond{font-size:11px;line-height:1.7;color:#334155}
+  .best-val{color:#1E8A5E;font-weight:800}
+  .worst-val{color:#DC2626}
+  .footer{margin-top:16px;padding-top:10px;border-top:1px solid #E2E8F0;font-size:10px;color:#94a3b8;display:flex;justify-content:space-between}
+  @media print{button{display:none!important}body{padding:12px 18px}}
 </style>
 </head>
 <body>
-<div class="pdf-kp">
-  <div class="pdf-hdr">
-    <div>
-      ${rl.logo?`<img src="${rl.logo}" style="max-height:50px;max-width:160px;object-fit:contain;display:block;margin-bottom:6px" alt="лого">`:''}
-      <div class="pdf-rl-name">${rl.name||'Сравнение вариантов'}</div>
-      <div class="pdf-rl-sub">${[rl.agency,rl.phone].filter(Boolean).join(' · ')}</div>
+<div class="wrap">
+  <div class="hdr">
+    <div style="display:flex;align-items:center;gap:12px">
+      ${rl.logo?'<img src="'+rl.logo+'" class="rl-logo" alt="">':''}
+      <div>
+        <div class="rl-name">${rl.name||'Консультация по квартире'}</div>
+        <div class="rl-sub">${[rl.agency,rl.phone,rl.email].filter(Boolean).join(' · ')}</div>
+      </div>
     </div>
-    <div style="text-align:right">
-      <div class="kp-badge">Сравнение вариантов</div>
-      <div style="font-size:11px;color:#94a3b8;margin-top:6px">${today}</div>
-    </div>
+    <div style="font-size:20px;font-weight:800;color:#1A365D">Сравнение вариантов</div>
   </div>
 
-  <div class="sec">Финансовое сравнение</div>
   <table>
     <thead>
       <tr>
-        <th>Вариант</th>
-        <th>Цена, ₽</th>
-        <th>Итого выплат, ₽</th>
-        <th>Переплата, ₽</th>
-        <th>Платёж/мес, ₽</th>
-        <th>Срок, лет</th>
-        <th>Вычет (оценка), ₽</th>
+        <th style="width:185px">Вариант</th>
+        <th style="width:175px">Цена / Первоначальный взнос</th>
+        <th>Условия платежей</th>
+        <th style="width:155px">Итоговая выплата</th>
       </tr>
     </thead>
     <tbody>
-      ${rows.map(({v,years,sqmT,totalVyc})=>`<tr>
-        <td>${v.name}${v.ref&&v.ref.zhk?'<br><span style="font-size:10px;font-weight:400;color:#64748b">'+v.ref.zhk+'</span>':''}</td>
-        <td>${fmt(v.R.price)}</td>
-        <td class="${v.R.totPay===mi('totPay')?'best':v.R.totPay===ma('totPay')?'worst':''}">${fmt(v.R.totPay)}</td>
-        <td class="${v.R.overpay===mi('overpay')?'best':v.R.overpay===ma('overpay')?'worst':''}">${fmt(v.R.overpay)}</td>
-        <td>${v.R.firstPay?fmt(v.R.firstPay):'—'}</td>
-        <td class="${v.R.totalMo===mi('totalMo')?'best':''}">${fmtd(years,1)}</td>
-        <td class="best" style="color:#1E8A5E">${totalVyc>0?'+'+fmt(Math.round(totalVyc)):'—'}</td>
-      </tr>`).join('')}
+      ${rows.map(function(row){
+        const v=row.v, fp=row.fp, cond=row.cond;
+        const area = v.ref&&v.ref.area ? +v.ref.area : 0;
+        const sqmP = area>0 ? Math.round(v.R.price/area) : 0;
+        const dpPct = v.R.price>0 ? (v.R.dp/v.R.price*100).toFixed(1).replace('.',',') : '0';
+        const totBest = v.R.totPay===mi('totPay');
+        const totWorst = v.R.totPay===ma('totPay');
+        const ovBest = (v.R.overpay||0)===mi('overpay')&&(v.R.overpay||0)>0;
+        const ovWorst = (v.R.overpay||0)===ma('overpay')&&(v.R.overpay||0)>0;
+        return '<tr>'+
+          '<td>'+
+            '<div>'+v.name+'</div>'+
+            (v.ref&&v.ref.zhk?'<div class="sub">'+v.ref.zhk+'</div>':'')+
+            (fp?'<img src="'+fp+'" class="fp-mini" alt="">':'')+
+            (v.ref&&v.ref.note?'<div class="note-txt">'+v.ref.note+'</div>':'')+
+          '</td>'+
+          '<td>'+
+            '<div style="font-size:13px;font-weight:800">'+fmt(v.R.price)+' ₽</div>'+
+            (sqmP>0?'<div class="sub">'+fmt(sqmP)+' ₽/м²</div>':'')+
+            '<div style="margin-top:7px;font-size:12px">ПВ: <strong>'+fmt(v.R.dp)+' ₽</strong></div>'+
+            '<div class="sub">'+dpPct+'% от цены</div>'+
+          '</td>'+
+          '<td class="cond">'+cond+'</td>'+
+          '<td>'+
+            '<div style="font-size:13px;font-weight:800'+(totBest?';color:#1E8A5E':totWorst?';color:#DC2626':'')+'">'+(v.R.totPay?fmt(v.R.totPay)+' ₽':'—')+'</div>'+
+            ((v.R.overpay||0)>0?'<div class="sub'+(ovBest?' best-val':ovWorst?' worst-val':'')+'">переплата: '+fmt(v.R.overpay)+' ₽</div>':'')+
+          '</td>'+
+        '</tr>';
+      }).join('')}
     </tbody>
   </table>
 
-  <div class="sec" style="margin-top:24px">Выводы</div>
-  <div class="winner-box">
-    <div style="font-size:14px;font-weight:800;color:#1E8A5E;margin-bottom:8px">🏆 Оптимальный вариант</div>
-    <div style="font-size:13px;color:#14532d;line-height:1.6">
-      Минимальная переплата: <strong>${SVs.find(v=>v.R.overpay===mi('overpay')).name}</strong> (${fmt(mi('overpay'))} ₽)<br>
-      Минимальный платёж: <strong>${SVs.find(v=>(v.R.firstPay||Infinity)===mi('firstPay')).name}</strong> (${fmt(mi('firstPay'))} ₽/мес)<br>
-      Минимальный срок: <strong>${SVs.find(v=>v.R.totalMo===mi('totalMo')).name}</strong> (${fmtd(mi('totalMo')/12,1)} лет)<br>
-      Наибольший вычет: <strong>${rows.sort((a,b)=>b.totalVyc-a.totalVyc)[0].v.name}</strong> (+${fmt(Math.round(rows[0].totalVyc))} ₽)
-    </div>
+  <div class="footer">
+    <span>${[rl.name,rl.phone,rl.email].filter(Boolean).join(' · ')}</span>
+    <span>Расчёт носит предварительный характер · ${today}</span>
   </div>
 
-  <div class="pdf-footer">
-    <span>${rl.name||''} · ${rl.phone||''}</span>
-    <span>Расчёт подготовлен ${today} · Предварительный, не является офертой</span>
-  </div>
-
-  <div style="text-align:center;margin-top:18px">
-    <button onclick="window.print()" style="padding:10px 28px;background:#1A365D;color:#FFD700;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">🖨 Распечатать / Сохранить PDF</button>
+  <div style="text-align:center;margin-top:14px">
+    <button onclick="window.print()" style="padding:9px 26px;background:#1A365D;color:#FFD700;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">🖨 Сохранить PDF</button>
   </div>
 </div>
 </body>
